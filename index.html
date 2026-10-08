@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Портал заявок</title>
+<meta name="description" content="Корпоративный портал заявок ТОО «Ойл энд газ» — рабочий прототип по PRD v1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0B2545;--secondary:#3E5C76;--accent:#E09F3E;--bg:#F4F6F8;--text:#1B1F24;
+  --muted:#5B6673;--border:#DCE2E8;--card:#FFFFFF;--hover:#EEF2F6;
+  --ok:#2E7D32;--warn:#ED6C02;--err:#C62828;--info:#0277BD;
+  --ok-bg:#E8F3E9;--warn-bg:#FDF0E5;--err-bg:#FBEAEA;--info-bg:#E5F2FA;--muted-bg:#EDF0F3;--primary-bg:#E6EBF2;
+  --radius:8px;--shadow:0 1px 2px rgba(11,37,69,.06),0 1px 3px rgba(11,37,69,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.5 Inter,Roboto,"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--info);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3{margin:0 0 12px;line-height:1.25}
+h1{font-size:22px}h2{font-size:17px}h3{font-size:15px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* layout */
+.layout{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+.sidebar{background:var(--primary);color:#D8E1EC;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo{width:34px;height:34px;border-radius:7px;background:var(--accent);color:var(--primary);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.brand b{display:block;color:#fff;font-size:14px}
+.brand small{color:#9FB0C4;font-size:12px}
+.nav{padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:6px;color:#C9D4E1;font-weight:500}
+.nav a:hover{background:rgba(255,255,255,.07);text-decoration:none;color:#fff}
+.nav a.active{background:rgba(224,159,62,.16);color:#fff;box-shadow:inset 3px 0 0 var(--accent)}
+.nav .cnt{background:var(--accent);color:var(--primary);border-radius:10px;font-size:11px;font-weight:700;padding:0 7px;line-height:18px}
+.nav-sec{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#7F93AA;padding:14px 12px 4px}
+.side-foot{margin-top:auto;padding:14px 18px;font-size:12px;color:#7F93AA;border-top:1px solid rgba(255,255,255,.08)}
+.side-foot button{background:none;border:0;color:#C9D4E1;cursor:pointer;padding:0;text-decoration:underline}
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{height:58px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 24px;position:sticky;top:0;z-index:20}
+.burger{display:none;background:none;border:0;font-size:22px;cursor:pointer;padding:4px 6px}
+.search{flex:1;max-width:340px;position:relative}
+.search input{width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:6px;background:var(--bg)}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.5}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:6px;position:relative}
+.icon-btn{background:none;border:0;cursor:pointer;width:38px;height:38px;border-radius:6px;display:grid;place-items:center;position:relative}
+.icon-btn:hover{background:var(--hover)}
+.dot{position:absolute;top:4px;right:3px;background:var(--err);color:#fff;font-size:10px;font-weight:700;border-radius:9px;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px}
+.user-btn{display:flex;align-items:center;gap:8px;background:none;border:0;cursor:pointer;padding:4px 8px;border-radius:6px}
+.user-btn:hover{background:var(--hover)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--secondary);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+.user-btn .nm{text-align:left;line-height:1.2}
+.user-btn .nm small{color:var(--muted);font-size:12px}
+.dropdown{position:absolute;right:0;top:48px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(11,37,69,.15);width:340px;max-height:70vh;overflow:auto;z-index:30}
+.dropdown .dd-h{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.dd-item{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--border);padding:10px 14px;cursor:pointer;color:var(--text)}
+.dd-item:hover{background:var(--hover);text-decoration:none}
+.dd-item.unread{background:#FFF8EC}
+.dd-item small{display:block;color:var(--muted);font-size:12px}
+.content{padding:24px;max-width:1280px;width:100%}
+.page-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-h h1{margin:0}
+.crumbs{color:var(--muted);font-size:13px;margin-bottom:4px}
+
+/* components */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card+.card{margin-top:16px}
+.card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+.card-h h2,.card-h h3{margin:0}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-weight:500;white-space:nowrap;color:var(--text)}
+.btn:hover{background:var(--hover);text-decoration:none}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn-primary:hover{background:#163864}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:#1B1F24;font-weight:600}
+.btn-accent:hover{background:#D08E2C}
+.btn-danger{background:var(--err);border-color:var(--err);color:#fff}
+.btn-danger:hover{background:#A82121}
+.btn-ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn-ok:hover{background:#256A29}
+.btn-sm{padding:4px 10px;font-size:13px}
+.btn-block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap}
+.b-ok{background:var(--ok-bg);color:var(--ok)}.b-warn{background:var(--warn-bg);color:#B04F00}
+.b-err{background:var(--err-bg);color:var(--err)}.b-info{background:var(--info-bg);color:var(--info)}
+.b-muted{background:var(--muted-bg);color:var(--muted)}.b-primary{background:var(--primary-bg);color:var(--primary)}
+.chip{display:inline-block;padding:1px 8px;border-radius:4px;background:var(--muted-bg);font-size:12px;margin:1px 2px 1px 0}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.alert{padding:10px 14px;border-radius:6px;margin-bottom:12px;border-left:4px solid}
+.a-warn{background:var(--warn-bg);border-color:var(--warn)}
+.a-err{background:var(--err-bg);border-color:var(--err)}
+.a-info{background:var(--info-bg);border-color:var(--info)}
+.a-ok{background:var(--ok-bg);border-color:var(--ok)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;margin:0 -18px;padding:0 18px}
+table.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl .mono{white-space:nowrap}
+.tbl tr.click{cursor:pointer}
+.tbl tr.click:hover td{background:var(--hover)}
+.tbl tr.overdue td:first-child{box-shadow:inset 3px 0 0 var(--err)}
+.tbl tr.overdue td{background:#FFF6F6}
+.tbl input[type=number]{width:72px;padding:4px 6px;border:1px solid var(--border);border-radius:4px}
+
+/* forms */
+.field{margin-bottom:14px}
+.field>label,.lbl{display:block;font-weight:500;margin-bottom:5px}
+.req{color:var(--err)}
+.inp,.field input:not([type=checkbox]):not([type=radio]),.field select,.field textarea{width:100%;padding:8px 10px;border:1px solid #C7D0DA;border-radius:6px;background:#fff}
+.field textarea{min-height:88px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--secondary);outline:2px solid rgba(62,92,118,.2)}
+.field.has-err input,.field.has-err select,.field.has-err textarea{border-color:var(--err)}
+.ferr{color:var(--err);font-size:12px;margin-top:4px}
+.hint{color:var(--muted);font-size:12px;margin-top:4px}
+.range{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.check{display:flex;gap:8px;align-items:center;cursor:pointer}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px}
+.filters .field{margin:0;min-width:150px}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tabs a{padding:9px 14px;color:var(--muted);font-weight:500;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs a:hover{color:var(--text);text-decoration:none}
+.tabs a.active{color:var(--primary);border-color:var(--accent)}
+.tabs .badge{margin-left:4px}
+
+/* kpi */
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .v{font-size:26px;font-weight:700;color:var(--primary);line-height:1.2}
+.kpi .l{color:var(--muted);font-size:13px}
+a.kpi:hover{text-decoration:none;border-color:var(--secondary)}
+
+/* stepper */
+.stepper{display:flex;margin:4px 0 6px}
+.step{flex:1;text-align:center;position:relative;font-size:12px;color:var(--muted)}
+.step::before{content:"";position:absolute;top:11px;left:-50%;width:100%;height:2px;background:var(--border);z-index:0}
+.step:first-child::before{display:none}
+.step .c{width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--border);display:grid;place-items:center;margin:0 auto 4px;position:relative;z-index:1;font-size:11px;font-weight:700}
+.step.done .c{background:var(--ok);border-color:var(--ok);color:#fff}
+.step.done::before,.step.cur::before{background:var(--ok)}
+.step.cur .c{border-color:var(--accent);background:var(--accent);color:var(--primary)}
+.step.cur{color:var(--text);font-weight:600}
+.step.warn .c{border-color:var(--warn);background:var(--warn);color:#fff}
+
+/* request card */
+.kv{display:grid;grid-template-columns:200px 1fr;gap:6px 14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;white-space:pre-wrap;word-break:break-word}
+.side-kv{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;font-size:13px}
+.side-kv dt{color:var(--muted)}.side-kv dd{margin:0}
+.comment{padding:10px 12px;border-radius:6px;background:var(--bg);margin-bottom:8px}
+.comment.internal{background:#FFF8EC;border:1px dashed var(--accent)}
+.comment.sys{background:var(--info-bg)}
+.comment .h{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-bottom:3px}
+.comment .t{white-space:pre-wrap;word-break:break-word}
+.timeline{list-style:none;margin:0;padding:0;font-size:13px}
+.timeline li{padding:0 0 10px 16px;border-left:2px solid var(--border);position:relative}
+.timeline li::before{content:"";position:absolute;left:-5px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--secondary)}
+.timeline small{color:var(--muted);display:block}
+.file{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;margin:0 6px 6px 0;font-size:13px;background:#fff}
+
+/* catalog */
+.cat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.cat-h{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cat-ic{width:34px;height:34px;border-radius:7px;display:grid;place-items:center;font-weight:700;font-size:12px;color:#fff;flex:none}
+.type-item{display:flex;align-items:center;gap:6px;border-radius:6px}
+.type-item a{flex:1;padding:8px 10px;color:var(--text);border-radius:6px}
+.type-item a:hover{background:var(--hover);text-decoration:none}
+.star{background:none;border:0;cursor:pointer;font-size:16px;color:#B8C2CC;padding:4px 8px}
+.star.on{color:var(--accent)}
+
+/* charts */
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:grid;grid-template-columns:170px 1fr 44px;gap:10px;align-items:center;font-size:13px}
+.bar-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-t{height:14px;background:var(--muted-bg);border-radius:3px;overflow:hidden}
+.bar-f{height:100%;background:var(--secondary);border-radius:3px}
+.bar-v{text-align:right;font-weight:600}
+.cols{display:flex;align-items:flex-end;gap:4px;height:150px;padding-top:10px;border-bottom:1px solid var(--border)}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:11px;color:var(--muted)}
+.col .f{width:100%;max-width:28px;background:var(--secondary);border-radius:3px 3px 0 0;min-height:2px}
+.col .f.today{background:var(--accent)}
+.col-lbls{display:flex;gap:4px;font-size:10px;color:var(--muted)}
+.col-lbls span{flex:1;text-align:center}
+
+/* calendar */
+.cal{border-collapse:collapse;font-size:12px}
+.cal th,.cal td{border:1px solid var(--border);padding:0;text-align:center;min-width:24px;height:28px}
+.cal th{background:var(--bg);font-weight:600;font-size:11px}
+.cal th.we,.cal td.we{background:#EEF1F4}
+.cal th.hot{background:var(--err-bg);color:var(--err)}
+.cal td.name{text-align:left;padding:0 10px;white-space:nowrap;min-width:180px;font-size:13px;position:sticky;left:0;background:#fff}
+.cal td.v{background:var(--secondary)}
+.cal td.vp{background:repeating-linear-gradient(45deg,#9FB3C6,#9FB3C6 4px,#C9D6E2 4px,#C9D6E2 8px)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-3px;margin-right:5px}
+
+/* modal / toast */
+.modal-bg{position:fixed;inset:0;background:rgba(11,37,69,.45);display:grid;place-items:center;z-index:100;padding:16px}
+.modal{background:#fff;border-radius:10px;width:100%;max-width:500px;padding:22px;max-height:90vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.merr{color:var(--err);font-size:13px;min-height:1px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--primary);color:#fff;padding:10px 18px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.2);animation:tin .2s ease-out}
+.toast.err{background:var(--err)}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+.stars{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:4px}
+.stars input{position:absolute;opacity:0;width:1px;height:1px}
+.stars label{font-size:30px;color:#C7D0DA;cursor:pointer;line-height:1}
+.stars input:checked~label,.stars label:hover,.stars label:hover~label{color:var(--accent)}
+.stars input:focus-visible+label{outline:2px solid var(--accent)}
+
+/* login */
+.login-wrap{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.login-hero{background:var(--primary);color:#D8E1EC;padding:48px;display:flex;flex-direction:column;justify-content:space-between}
+.login-hero h2{color:#fff;font-size:28px;max-width:440px;line-height:1.25;margin:0 0 14px}
+.login-hero ul{padding-left:18px;margin:0;color:#B9C6D6}
+.login-hero li{margin-bottom:6px}
+.login-side{display:grid;place-items:center;padding:24px}
+.login-card{width:100%;max-width:380px}
+.demo{margin-top:22px;border-top:1px solid var(--border);padding-top:16px}
+.demo-list{display:grid;gap:6px;margin-top:8px}
+.demo-list button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 10px;cursor:pointer}
+.demo-list button:hover{background:var(--hover)}
+
+.org ul{list-style:none;padding-left:22px;margin:0;border-left:1px dashed var(--border)}
+.org>ul{padding-left:0;border:0}
+.org li{padding:6px 0}
+.builder-row{display:grid;grid-template-columns:1.4fr 1fr 1.2fr auto auto;gap:8px;align-items:center;margin-bottom:8px}
+.builder-row input,.builder-row select{padding:7px 9px;border:1px solid #C7D0DA;border-radius:6px;width:100%}
+
+@media (max-width:1100px){.split{grid-template-columns:1fr}.cat-grid{grid-template-columns:1fr 1fr}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:0;top:0;width:260px;z-index:50;transform:translateX(-100%);transition:transform .2s}
+  .sidebar.open{transform:none;box-shadow:0 0 0 100vmax rgba(11,37,69,.4)}
+  .burger{display:block}
+  .topbar{padding:0 12px}
+  .content{padding:16px}
+  .user-btn .nm{display:none}
+  .g2,.g3{grid-template-columns:1fr}
+  .login-wrap{grid-template-columns:1fr}
+  .login-hero{display:none}
+}
+@media (max-width:640px){
+  .cat-grid{grid-template-columns:1fr}
+  .kv{grid-template-columns:1fr;gap:0 0}
+  .kv dd{margin-bottom:8px}
+  .bar-row{grid-template-columns:110px 1fr 36px}
+  .dropdown{position:fixed;left:8px;right:8px;width:auto;top:58px}
+  .search{max-width:none}
+  .builder-row{grid-template-columns:1fr 1fr}
+  .stepper .step span{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast" aria-live="polite"></div>
+<noscript>Для работы портала необходимо включить JavaScript.</noscript>
+
+<script>
+'use strict';
+/* ================== Константы ================== */
+const KEY = 'oilgas-portal-v1';
+const HOUR = 36e5, DAY = 864e5;
+const DEMO_PASSWORD = 'Portal2026';
+const IDLE_MIN = 30;
+const STATUS = {
+  draft:['Черновик','muted'], pending_approval:['На согласовании','info'], returned:['На доработке','warn'],
+  rejected:['Отклонено','err'], new:['Новая','primary'], in_progress:['В работе','info'],
+  waiting_info:['Ожидает информации','warn'], done:['Выполнено','ok'], closed:['Закрыто','muted'], cancelled:['Отозвано','muted']
+};
+const ACTIVE = ['new','in_progress','waiting_info'];
+const ROLE_NAMES = {employee:'Сотрудник', head:'Руководитель', manager:'Менеджер', admin:'Администратор'};
+const PRIOS = ['Низкий','Средний','Высокий','Критический'];
+const PRIO_BADGE = {'Низкий':'muted','Средний':'info','Высокий':'warn','Критический':'err'};
+const CAT_COLORS = {HR:'#3E5C76', IT:'#0277BD', AHO:'#8A5A12'};
+const HOLIDAYS = ['2026-01-01','2026-01-02','2026-01-07','2026-03-08','2026-03-09','2026-03-21','2026-03-22','2026-03-23','2026-03-24','2026-05-01','2026-05-07','2026-05-09','2026-05-27','2026-07-06','2026-08-30','2026-08-31','2026-10-25','2026-10-26','2026-12-16',
+  '2027-01-01','2027-01-02','2027-01-07','2027-03-08','2027-03-21','2027-03-22','2027-03-23','2027-05-01','2027-05-07','2027-05-09','2027-07-06','2027-08-30','2027-10-25','2027-12-16'];
+const FIELD_TYPES = {text:'Текст',textarea:'Многострочный текст',number:'Число',date:'Дата',daterange:'Период дат',time:'Время',datetime:'Дата и время',select:'Выпадающий список',checkbox:'Чекбокс',employee:'Выбор сотрудника',file:'Файл'};
+const FILE_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png'];
+
+/* ================== Утилиты ================== */
+const $ = s => document.querySelector(s);
+const now = () => Date.now();
+const uid = () => Math.random().toString(36).slice(2,10);
+const pad = n => String(n).padStart(2,'0');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtD = t => { if(t==null||t==='') return '—'; const d = typeof t==='string' ? parseISO(t) : new Date(t); return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear(); };
+const fmtDT = t => { if(!t) return '—'; const d = new Date(t); return fmtD(t)+' '+pad(d.getHours())+':'+pad(d.getMinutes()); };
+const isoDate = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parseISO = s => new Date(s+'T00:00:00');
+const dISO = off => { const d = new Date(); d.setDate(d.getDate()+off); return isoDate(d); };
+const hrs = ms => { const h = Math.abs(ms)/HOUR; return h < 48 ? Math.round(h)+' ч' : (Math.round(h/24*10)/10)+' дн'; };
+const plural = (n,a,b,c) => { n=Math.abs(n)%100; const n1=n%10; return n>10&&n<20?c:n1>1&&n1<5?b:n1===1?a:c; };
+function vacDays(from,to){ if(!from||!to||to<from) return 0; let d=parseISO(from), e=parseISO(to), n=0; while(d<=e){ if(!HOLIDAYS.includes(isoDate(d))) n++; d.setDate(d.getDate()+1); } return n; }
+function workdaysSince(t){ let d=new Date(t), n=0; d.setHours(0,0,0,0); d.setDate(d.getDate()+1); const end=new Date(); while(d<=end){ const w=d.getDay(); if(w&&w!==6&&!HOLIDAYS.includes(isoDate(d))) n++; d.setDate(d.getDate()+1);} return n; }
+function toast(msg, err){ const el=document.createElement('div'); el.className='toast'+(err?' err':''); el.textContent=msg; $('#toast').appendChild(el); setTimeout(()=>el.remove(), 3200); }
+function download(name, text){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+text],{type:'text/csv;charset=utf-8'})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+const csv = rows => rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+
+/* ================== Данные ================== */
+const F = (key,label,type='text',req=true,options) => ({key,label,type,req,options});
+function seed(){
+  const t0 = now();
+  const db = {
+    version:1, seq:{}, session:null, company:'ТОО «Ойл энд газ»',
+    departments:[
+      {id:'mgmt',name:'Руководство',parent:null,head:'u6'},
+      {id:'prod',name:'Производственный отдел',parent:'mgmt',head:'u2'},
+      {id:'it',name:'ИТ-служба',parent:'mgmt',head:'u3'},
+      {id:'hr',name:'Отдел кадров',parent:'mgmt',head:'u4'},
+      {id:'aho',name:'Административно-хозяйственный отдел',parent:'mgmt',head:'u5'}
+    ],
+    users:[
+      {id:'u1',name:'Иванов Алексей Сергеевич',login:'ivanov',email:'ivanov@oilgas.kz',position:'Инженер-технолог',dept:'prod',managerId:'u2',roles:['employee'],phone:'+7 701 111 22 33'},
+      {id:'u2',name:'Петрова Мария Викторовна',login:'petrova',email:'petrova@oilgas.kz',position:'Начальник производственного отдела',dept:'prod',managerId:'u6',roles:['employee','head'],phone:'+7 701 222 33 44'},
+      {id:'u3',name:'Сидоров Ержан Маратович',login:'sidorov',email:'sidorov@oilgas.kz',position:'Ведущий ИТ-специалист',dept:'it',managerId:'u6',roles:['employee','head','manager'],mgrCats:['IT'],senior:true,phone:'+7 701 333 44 55'},
+      {id:'u4',name:'Ким Анна Олеговна',login:'kim',email:'kim@oilgas.kz',position:'HR-менеджер',dept:'hr',managerId:'u6',roles:['employee','manager'],mgrCats:['HR'],senior:true,phone:'+7 701 444 55 66'},
+      {id:'u5',name:'Ахметов Данияр Бекович',login:'akhmetov',email:'akhmetov@oilgas.kz',position:'Менеджер АХО',dept:'aho',managerId:'u6',roles:['employee','manager'],mgrCats:['AHO'],senior:true,phone:'+7 701 555 66 77'},
+      {id:'u6',name:'Каримов Серик Нурланович',login:'karimov',email:'karimov@oilgas.kz',position:'Генеральный директор',dept:'mgmt',managerId:null,roles:['employee','head'],phone:'+7 701 666 77 88'},
+      {id:'u7',name:'Нурланов Тимур Аскарович',login:'admin',email:'admin@oilgas.kz',position:'Системный администратор',dept:'it',managerId:'u3',roles:['employee','admin'],phone:'+7 701 777 88 99'},
+      {id:'u8',name:'Смирнов Олег Игоревич',login:'smirnov',email:'smirnov@oilgas.kz',position:'Инженер',dept:'prod',managerId:'u2',roles:['employee'],phone:'+7 701 888 99 00'},
+      {id:'u9',name:'Жумабаева Айгерим Маратовна',login:'zhumabaeva',email:'zhumabaeva@oilgas.kz',position:'Техник',dept:'prod',managerId:'u2',roles:['employee'],phone:'+7 701 999 00 11'},
+      {id:'u10',name:'Ли Дмитрий Андреевич',login:'li',email:'li@oilgas.kz',position:'ИТ-специалист',dept:'it',managerId:'u3',roles:['employee','manager'],mgrCats:['IT'],phone:'+7 701 000 11 22'}
+    ],
+    categories:[
+      {id:'HR',name:'Кадры (HR)',desc:'Отпуска, справки, командировки',active:true},
+      {id:'IT',name:'ИТ',desc:'Инциденты, оборудование, доступы',active:true},
+      {id:'AHO',name:'АХО',desc:'Хозяйственное обслуживание и офис',active:true}
+    ],
+    types:[
+      {id:'hr_vac',cat:'HR',name:'Ежегодный оплачиваемый отпуск',approval:true,sla:24,vacation:'paid',fields:[F('period','Даты отпуска','daterange'),F('substitute','Замещающий сотрудник','employee',false),F('comment','Комментарий','textarea',false)]},
+      {id:'hr_unpaid',cat:'HR',name:'Отпуск без сохранения заработной платы',approval:true,sla:24,vacation:'unpaid',fields:[F('period','Даты отпуска','daterange'),F('reason','Причина','textarea')]},
+      {id:'hr_move',cat:'HR',name:'Перенос отпуска',approval:true,sla:24,vacation:'move',fields:[F('oldPeriod','Исходные даты','daterange'),F('newPeriod','Новые даты','daterange'),F('reason','Причина','textarea')]},
+      {id:'hr_cert',cat:'HR',name:'Справка с места работы',approval:false,sla:16,fields:[F('kind','Вид справки','select',true,['С места работы','О заработной плате','О стаже работы','Для визы']),F('copies','Количество экземпляров','number'),F('place','Место предоставления')]},
+      {id:'hr_trip',cat:'HR',name:'Командировка',approval:true,sla:24,fields:[F('city','Город'),F('period','Даты','daterange'),F('goal','Цель командировки','textarea'),F('tickets','Нужны билеты','checkbox',false),F('hotel','Нужна гостиница','checkbox',false)]},
+      {id:'it_inc',cat:'IT',name:'Инцидент (не работает оборудование / ПО)',approval:false,sla:8,fields:[F('description','Описание проблемы','textarea'),F('priority','Приоритет','select',true,PRIOS),F('inv','Инвентарный номер','text',false),F('files','Скриншоты','file',false)]},
+      {id:'it_equip',cat:'IT',name:'Выдача / замена оборудования',approval:true,sla:40,fields:[F('equipType','Тип оборудования','select',true,['Ноутбук','Монитор','Системный блок','Телефон','Периферия']),F('reason','Обоснование','textarea')]},
+      {id:'it_soft',cat:'IT',name:'Установка ПО',approval:true,sla:16,fields:[F('software','Наименование ПО'),F('reason','Обоснование','textarea')]},
+      {id:'it_access',cat:'IT',name:'Предоставление доступа',approval:true,sla:16,fields:[F('system','Система / ресурс'),F('level','Уровень доступа','select',true,['Чтение','Чтение и запись','Администратор']),F('until','Срок действия до','date',false)]},
+      {id:'it_account',cat:'IT',name:'Учётная запись для нового сотрудника',approval:true,sla:16,fields:[F('fio','ФИО'),F('position','Должность'),F('department','Подразделение'),F('startDate','Дата выхода','date')]},
+      {id:'aho_stat',cat:'AHO',name:'Канцелярские товары',approval:false,sla:24,fields:[F('items','Перечень позиций и количество','textarea')]},
+      {id:'aho_repair',cat:'AHO',name:'Ремонт / обслуживание помещения',approval:false,sla:24,fields:[F('location','Кабинет / локация'),F('description','Описание неисправности','textarea'),F('photo','Фото','file',false)]},
+      {id:'aho_pass',cat:'AHO',name:'Пропуск для посетителя',approval:false,sla:4,fields:[F('guest','ФИО гостя'),F('org','Организация'),F('visit','Дата и время визита','datetime')]},
+      {id:'aho_room',cat:'AHO',name:'Бронирование переговорной',approval:false,sla:4,fields:[F('room','Переговорная','select',true,['Каспий (10 мест)','Алатау (6 мест)','Тенгиз (20 мест)']),F('date','Дата','date'),F('timeFrom','Время с','time'),F('timeTo','Время по','time'),F('people','Количество участников','number')]},
+      {id:'aho_transport',cat:'AHO',name:'Заказ транспорта',approval:true,sla:8,fields:[F('route','Маршрут'),F('date','Дата','date'),F('time','Время','time'),F('pax','Количество пассажиров','number')]},
+      {id:'aho_furniture',cat:'AHO',name:'Мебель / перемещение рабочего места',approval:true,sla:40,fields:[F('description','Описание','textarea'),F('location','Локация')]}
+    ],
+    requests:[], notifications:[], audit:[],
+    templates:['Заявка принята в работу. Срок выполнения — согласно SLA.','Уточните, пожалуйста, детали: ','Работы выполнены. Проверьте, пожалуйста, и закройте заявку.'],
+    settings:{idle:IDLE_MIN, maxFiles:10, maxMb:20}
+  };
+  db.users.forEach(u => Object.assign(u,{active:true,password:DEMO_PASSWORD,failed:0,lockedUntil:0,favorites:[],vacTotal:24,vacUsed:0,deputy:null,mgrCats:u.mgrCats||[],senior:!!u.senior,notif:{}}));
+  db.users.find(u=>u.id==='u1').vacUsed = 6;
+  db.users.find(u=>u.id==='u1').favorites = ['it_inc','hr_vac'];
+  db.types.forEach(t => Object.assign(t,{active:true,slaApproval:8}));
+
+  const mk = o => {
+    const t = db.types.find(x=>x.id===o.type);
+    db.seq[t.cat] = (db.seq[t.cat]||0)+1;
+    const created = t0 - o.ago*HOUR;
+    const r = {id:uid(), number:`${t.cat}-${new Date(created).getFullYear()}-${pad(db.seq[t.cat]).padStart(5,'0')}`, typeId:t.id, authorId:o.author,
+      approverId:o.approver||null, assigneeId:o.assignee||null, status:o.status, priority:o.priority||'Средний', form:o.form,
+      createdAt:created, updatedAt:created, approvedAt:o.approvedAgo!=null?t0-o.approvedAgo*HOUR:null,
+      newAt:o.newAgo!=null?t0-o.newAgo*HOUR:null, slaDue:null, doneAt:o.doneAgo!=null?t0-o.doneAgo*HOUR:null,
+      closedAt:o.closedAgo!=null?t0-o.closedAgo*HOUR:null, rating:o.rating||null, ratingComment:o.rc||'', order:o.order||null,
+      approvalDue:null, history:[], comments:[], attachments:o.files||[]};
+    if(r.newAt) r.slaDue = r.newAt + t.sla*HOUR;
+    if(o.approver) r.approvalDue = created + 8*HOUR;
+    r.history.push({t:created,userId:o.author,action:'Заявка создана и отправлена'});
+    (o.hist||[]).forEach(h=>r.history.push({t:t0-h[0]*HOUR,userId:h[1],action:h[2]}));
+    (o.comments||[]).forEach(c=>r.comments.push({id:uid(),t:t0-c[0]*HOUR,userId:c[1],text:c[2],internal:!!c[3]}));
+    r.updatedAt = r.history[r.history.length-1].t;
+    db.requests.push(r); return r;
+  };
+  mk({type:'hr_cert',author:'u1',status:'closed',ago:320,newAgo:320,assignee:'u4',doneAgo:300,closedAgo:296,rating:5,rc:'Быстро, спасибо!',form:{kind:'С места работы',copies:2,place:'Банк'},hist:[[318,'u4','Взята в работу'],[300,'u4','Отмечена выполненной'],[296,'u1','Закрыта с оценкой 5']]});
+  mk({type:'aho_repair',author:'u8',status:'closed',ago:240,newAgo:240,assignee:'u5',doneAgo:200,closedAgo:150,rating:4,form:{location:'Каб. 214',description:'Не работает кондиционер'},hist:[[236,'u5','Взята в работу'],[200,'u5','Отмечена выполненной'],[150,null,'Закрыта автоматически (3 рабочих дня без ответа)']]});
+  mk({type:'hr_vac',author:'u9',status:'closed',ago:150,approver:'u2',approvedAgo:140,newAgo:140,assignee:'u4',doneAgo:120,closedAgo:118,rating:5,order:{no:'145-О',date:dISO(-5)},form:{period:{from:dISO(18),to:dISO(24)},comment:''},hist:[[140,'u2','Согласовано руководителем'],[130,'u4','Взята в работу'],[120,'u4','Выполнено. Приказ № 145-О']]});
+  mk({type:'hr_trip',author:'u2',status:'rejected',ago:100,approver:'u6',form:{city:'Атырау',period:{from:dISO(3),to:dISO(6)},goal:'Аудит производственной площадки',tickets:true,hotel:true},hist:[[96,'u6','Отклонено руководителем']],comments:[[96,'u6','Командировка переносится на следующий квартал — бюджет исчерпан.']]});
+  mk({type:'it_access',author:'u2',status:'in_progress',ago:34,approver:'u6',approvedAgo:30,newAgo:30,assignee:'u10',form:{system:'1С: Управление производством',level:'Чтение и запись',until:dISO(180)},hist:[[30,'u6','Согласовано руководителем'],[28,'u10','Взята в работу']]});
+  mk({type:'aho_room',author:'u2',status:'done',ago:30,newAgo:30,assignee:'u5',doneAgo:3,form:{room:'Каспий (10 мест)',date:dISO(1),timeFrom:'10:00',timeTo:'11:30',people:8},hist:[[29,'u5','Взята в работу'],[3,'u5','Отмечена выполненной']],comments:[[3,'u5','Переговорная забронирована, проектор подготовлен.']]});
+  mk({type:'it_equip',author:'u1',status:'returned',ago:26,approver:'u2',form:{equipType:'Ноутбук',reason:'Нужен для работы'},hist:[[22,'u2','Возвращено на доработку']],comments:[[22,'u2','Уточните, пожалуйста, обоснование: какие задачи не решаются на текущем ПК?']]});
+  mk({type:'hr_vac',author:'u8',status:'new',ago:20,approver:'u2',approvedAgo:16,newAgo:16,form:{period:{from:dISO(25),to:dISO(38)},substitute:'u9',comment:'Семейный отпуск'},hist:[[16,'u2','Согласовано руководителем']]});
+  mk({type:'it_inc',author:'u1',status:'in_progress',priority:'Высокий',ago:12,newAgo:12,assignee:'u3',form:{description:'Не запускается AutoCAD — ошибка лицензии при старте.',priority:'Высокий',inv:'INV-04512'},files:[{name:'error.png',size:184320}],hist:[[11,'u3','Взята в работу']],comments:[[11,'u3','Проверяю сервер лицензий.',false],[10,'u3','Похоже на истечение сетевой лицензии, жду ответа вендора.',true]]});
+  mk({type:'it_inc',author:'u9',status:'waiting_info',priority:'Средний',ago:9,newAgo:9,assignee:'u10',form:{description:'Не печатает принтер на 2 этаже',priority:'Средний',inv:''},hist:[[8,'u10','Взята в работу'],[7,'u10','Запрошена информация у заявителя']],comments:[[7,'u10','Уточните, пожалуйста, модель принтера и текст ошибки на экране.']]});
+  mk({type:'hr_vac',author:'u1',status:'pending_approval',ago:5,approver:'u2',form:{period:{from:dISO(20),to:dISO(33)},substitute:'u8',comment:'Плановый отпуск по графику'}});
+  mk({type:'it_soft',author:'u8',status:'pending_approval',ago:3,approver:'u2',form:{software:'MATLAB R2026a',reason:'Моделирование процессов на установке подготовки нефти'}});
+  mk({type:'aho_stat',author:'u3',status:'new',ago:1,newAgo:1,form:{items:'Бумага А4 — 5 пачек\nРучки синие — 20 шт.\nСтикеры — 10 блоков'}});
+  const N = (u,txt,code,ago) => { const r=db.requests.find(x=>x.number.startsWith(code.split('-')[0]+'-')&&x.number.endsWith(code.split('-')[1])); db.notifications.push({id:uid(),userId:u,reqId:r?r.id:null,text:txt.replace('#',r?r.number:''),read:false,t:t0-ago*HOUR}); };
+  N('u2','Требуется согласование: # (Иванов А.С.)','HR-00005',5);
+  N('u2','Требуется согласование: # (Смирнов О.И.)','IT-00005',3);
+  N('u2','Заявка # выполнена — подтвердите и оцените','AHO-00002',3);
+  N('u1','Заявка # возвращена на доработку','IT-00002',22);
+  N('u9','Запрошена информация по заявке #','IT-00004',7);
+  N('u4','Новая заявка в очереди: #','HR-00004',16);
+  N('u5','Новая заявка в очереди: #','AHO-00003',1);
+  db.audit.push({id:uid(),t:t0-48*HOUR,userId:'u7',action:'Импорт пользователей',entity:'User',entityId:'—',payload:'10 записей',ip:'10.0.1.15'});
+  db.requests.sort((a,b)=>a.createdAt-b.createdAt);
+  return db;
+}
+function load(){ try{ const s=localStorage.getItem(KEY); if(s){ const d=JSON.parse(s); if(d&&d.version===1) return d; } }catch(e){} return null; }
+let DB = load() || seed();
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
+
+/* ================== Доменные хелперы ================== */
+const U = id => DB.users.find(u=>u.id===id);
+const T = id => DB.types.find(t=>t.id===id);
+const C = id => DB.categories.find(c=>c.id===id);
+const D = id => DB.departments.find(d=>d.id===id);
+const R = id => DB.requests.find(r=>r.id===id);
+const me = () => DB.session ? U(DB.session.userId) : null;
+const has = (u,role) => !!u && u.roles.includes(role);
+const shortName = u => { if(!u) return '—'; const p=u.name.split(' '); return p[0]+' '+(p[1]?p[1][0]+'.':'')+(p[2]?p[2][0]+'.':''); };
+const initials = u => u ? u.name.split(' ').slice(0,2).map(s=>s[0]).join('') : '?';
+const catOf = r => T(r.typeId).cat;
+const statusBadge = s => `<span class="badge b-${STATUS[s][1]}">${STATUS[s][0]}</span>`;
+const prioBadge = p => `<span class="badge b-${PRIO_BADGE[p]||'muted'}">${esc(p)}</span>`;
+const vacLeft = u => u.vacTotal - u.vacUsed;
+function subordinates(id){ const out=[]; const walk=x=>DB.users.filter(u=>u.managerId===x).forEach(u=>{ if(!out.includes(u.id)){ out.push(u.id); walk(u.id);} }); walk(id); return out; }
+const managersOf = cat => DB.users.filter(u=>u.active&&has(u,'manager')&&u.mgrCats.includes(cat));
+const isCatManager = (u,cat) => has(u,'admin') || (has(u,'manager') && u.mgrCats.includes(cat));
+function canView(r,u){ return has(u,'admin') || r.authorId===u.id || r.approverId===u.id || isCatManager(u,catOf(r)) || subordinates(u.id).includes(r.authorId); }
+const isOverdue = r => ACTIVE.includes(r.status) && r.slaDue && r.slaDue < now();
+function resolveApprover(author){
+  const m = U(author.managerId);
+  if(!m || m.id===author.id) return null;
+  if(m.deputy && m.deputy.id && m.deputy.from<=isoDate(new Date()) && m.deputy.to>=isoDate(new Date())) return m.deputy.id;
+  return m.id;
+}
+function approvalsFor(u){ return DB.requests.filter(r=>r.status==='pending_approval' && (r.approverId===u.id || has(u,'admin'))); }
+function queueFor(u){ return DB.requests.filter(r=>!['draft','pending_approval','returned','cancelled'].includes(r.status) && isCatManager(u,catOf(r))); }
+function reportScope(u){
+  if(has(u,'admin')) return DB.requests.filter(r=>r.status!=='draft');
+  const subs = subordinates(u.id);
+  return DB.requests.filter(r=>r.status!=='draft' && ((has(u,'head') && (subs.includes(r.authorId)||r.authorId===u.id)) || (has(u,'manager') && u.mgrCats.includes(catOf(r)))));
+}
+function slaHtml(r){
+  if(!r.slaDue) return '<span class="muted">—</span>';
+  if(['done','closed'].includes(r.status)){ const ok=(r.doneAt||r.closedAt)<=r.slaDue; return `<span class="badge b-${ok?'ok':'err'}">${ok?'В срок':'Нарушен'}</span>`; }
+  if(!ACTIVE.includes(r.status)) return '<span class="muted">—</span>';
+  const rem = r.slaDue-now(), total = r.slaDue-r.newAt;
+  if(rem<0) return `<span class="badge b-err">Просрочено на ${hrs(rem)}</span>`;
+  if(rem < total*0.2) return `<span class="badge b-warn">Осталось ${hrs(rem)}</span>`;
+  return `<span class="small">до ${fmtDT(r.slaDue)}</span>`;
+}
+function periodOf(r){ const f=r.form; return f.period || f.newPeriod || null; }
+function vacOverlap(r){
+  const author = U(r.authorId), p = periodOf(r); if(!p) return null;
+  const team = DB.users.filter(u=>u.active && u.dept===author.dept);
+  const others = DB.requests.filter(x=>x.id!==r.id && T(x.typeId).vacation && !['draft','rejected','cancelled'].includes(x.status) && x.authorId!==r.authorId && U(x.authorId).dept===author.dept)
+    .filter(x=>{ const q=periodOf(x); return q && q.from<=p.to && q.to>=p.from; });
+  const names = [...new Set(others.map(x=>x.authorId))];
+  return {names:names.map(id=>shortName(U(id))), ratio:(names.length+1)/team.length, team:team.length};
+}
+
+/* ================== Журнал, уведомления, история ================== */
+function audit(action, entity, entityId, payload, userId){ DB.audit.unshift({id:uid(),t:now(),userId:userId!==undefined?userId:(me()?.id||null),action,entity,entityId,payload:payload||'',ip:'10.0.1.'+(20+Math.floor(Math.random()*60))}); if(DB.audit.length>2000) DB.audit.length=2000; }
+function notify(userId, r, text){ if(!userId || (me() && userId===me().id)) return; DB.notifications.unshift({id:uid(),userId,reqId:r?r.id:null,text,read:false,t:now()}); }
+function hist(r, action, userId){ r.history.push({t:now(),userId:userId!==undefined?userId:me().id,action}); r.updatedAt=now(); }
+function setStatus(r, status, action, comment){
+  const old = r.status; r.status = status; hist(r, action);
+  if(comment) r.comments.push({id:uid(),t:now(),userId:me().id,text:comment,internal:false});
+  audit('Смена статуса заявки','Request',r.number,`${STATUS[old][0]} → ${STATUS[status][0]}`);
+}
+function toQueue(r){
+  const t=T(r.typeId); r.status='new'; r.newAt=now(); r.slaDue=now()+t.sla*HOUR; r.slaWarned=false; r.slaNotified=false;
+  managersOf(t.cat).forEach(m=>notify(m.id, r, `Новая заявка в очереди: ${r.number}`));
+}
+function submitRequest(r){
+  const t=T(r.typeId), author=U(r.authorId);
+  const ap = t.approval ? resolveApprover(author) : null;
+  if(ap){ r.status='pending_approval'; r.approverId=ap; r.approvalDue=now()+(t.slaApproval||8)*HOUR; notify(ap, r, `Требуется согласование: ${r.number} (${shortName(author)})`); hist(r,'Отправлена на согласование'); }
+  else { toQueue(r); hist(r, t.approval?'Согласование пропущено (нет руководителя) — передана в очередь':'Передана в очередь исполнителей'); }
+}
+function autoProcess(){
+  let changed=false;
+  DB.requests.forEach(r=>{
+    if(r.status==='done' && r.doneAt && workdaysSince(r.doneAt)>=3){ r.status='closed'; r.closedAt=now(); r.history.push({t:now(),userId:null,action:'Закрыта автоматически (3 рабочих дня без ответа заявителя)'}); changed=true; }
+    if(ACTIVE.includes(r.status) && r.slaDue){
+      const rem=r.slaDue-now(), total=r.slaDue-r.newAt;
+      if(rem<0 && !r.slaNotified){ r.slaNotified=true; changed=true;
+        const tgt=new Set([r.assigneeId, ...managersOf(catOf(r)).filter(m=>m.senior).map(m=>m.id)]);
+        tgt.forEach(id=>id&&DB.notifications.unshift({id:uid(),userId:id,reqId:r.id,text:`Нарушен SLA по заявке ${r.number}`,read:false,t:now()})); }
+      else if(rem>=0 && rem<total*0.2 && !r.slaWarned){ r.slaWarned=true; changed=true; if(r.assigneeId) DB.notifications.unshift({id:uid(),userId:r.assigneeId,reqId:r.id,text:`Скоро истекает SLA: ${r.number}`,read:false,t:now()}); }
+    }
+  });
+  if(changed) save();
+}
+
+/* ================== UI-состояние и роутинг ================== */
+const UI = {my:{cat:'',status:'',period:'',q:''}, dept:{status:'',q:''}, catQ:'', queueTab:'new', reportPeriod:'90', calMonth:0, calDept:'', adminTab:'users', auditQ:'', bell:false, menu:false, sel:new Set(), builder:null};
+const hashRoute = () => { try{ return location.hash.replace(/^#\/?/,''); }catch(e){ return ''; } };
+let CUR = hashRoute() || 'home';
+function go(h){
+  CUR = h; UI.bell=false; UI.menu=false; UI.sel.clear(); closeModal();
+  try{ if(hashRoute()!==h) history.pushState(null,'','#/'+h); }catch(e){}
+  render(); window.scrollTo(0,0);
+}
+function parseRoute(){ const parts=CUR.split('/'); return {page:parts[0]||'home', arg:parts[1]?decodeURIComponent(parts[1]):null}; }
+const syncFromHash = () => { const h=hashRoute()||'home'; if(h!==CUR){ CUR=h; UI.sel.clear(); render(); } };
+window.addEventListener('hashchange', syncFromHash);
+window.addEventListener('popstate', syncFromHash);
+document.addEventListener('click', e=>{
+  const a = e.target.closest('a[href^="#/"]');
+  if(!a || e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey) return;
+  e.preventDefault(); const s=$('#sidebar'); if(s) s.classList.remove('open'); go(a.getAttribute('href').slice(2));
+});
+
+function render(){
+  autoProcess();
+  const u = me();
+  if(u && DB.session.last && now()-DB.session.last > (DB.settings.idle||IDLE_MIN)*60000){ audit('Автоматический выход по неактивности','Session',u.login,'',u.id); DB.session=null; save(); toast('Сессия завершена из-за неактивности'); }
+  if(!me()){ $('#app').innerHTML = pLogin(); return; }
+  DB.session.last = now(); save();
+  const {page,arg} = parseRoute();
+  const pages = {home:pHome, catalog:pCatalog, new:pNew, edit:pEdit, my:pMy, req:pReq, approvals:pApprovals, dept:pDept, calendar:pCalendar, queue:pQueue, reports:pReports, admin:pAdmin, builder:pBuilder, profile:pProfile};
+  const allowed = {approvals:['head','admin'], dept:['head','admin'], calendar:['head','admin'], queue:['manager','admin'], reports:['head','manager','admin'], admin:['admin'], builder:['admin']};
+  let body;
+  if(allowed[page] && !allowed[page].some(r=>has(me(),r))) body = p403();
+  else body = (pages[page]||p404)(arg);
+  $('#app').innerHTML = layout(page, body);
+  afterRender(page);
+}
+document.addEventListener('click', e=>{
+  if(DB.session) DB.session.last = now();
+  if(UI.bell && !e.target.closest('.bell-wrap')){ UI.bell=false; const d=$('#bellDD'); if(d) d.remove(); }
+  if(UI.menu && !e.target.closest('.menu-wrap')){ UI.menu=false; const d=$('#menuDD'); if(d) d.remove(); }
+});
+
+/* ================== Каркас ================== */
+const ICON_SEARCH = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+const ICON_BELL = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+function layout(page, body){
+  const u = me();
+  const nApp = approvalsFor(u).length, nQ = queueFor(u).filter(r=>r.status==='new').length;
+  const unread = DB.notifications.filter(n=>n.userId===u.id && !n.read).length;
+  const item = (h,label,roles,cnt) => (!roles || roles.some(r=>has(u,r))) ? `<a href="#/${h}" class="${page===h||(h==='catalog'&&page==='new')||(h==='admin'&&page==='builder')?'active':''}"><span>${label}</span>${cnt?`<span class="cnt">${cnt}</span>`:''}</a>` : '';
+  const work = item('approvals','На согласовании',['head','admin'],nApp)+item('dept','Заявки подразделения',['head','admin'])+item('calendar','Календарь отпусков',['head','admin'])+item('queue','Очередь заявок',['manager','admin'],nQ)+item('reports','Отчёты',['head','manager','admin']);
+  return `<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="logo">OG</div><div><b>Портал заявок</b><small>${esc(DB.company)}</small></div></div>
+    <nav class="nav" aria-label="Основное меню">
+      ${item('home','Главная')}${item('catalog','Создать заявку')}${item('my','Мои заявки')}
+      ${work?`<div class="nav-sec">Работа</div>${work}`:''}
+      ${has(u,'admin')?`<div class="nav-sec">Система</div>${item('admin','Администрирование',['admin'])}`:''}
+    </nav>
+    <div class="side-foot">Прототип по PRD v1.0 · данные хранятся в браузере<br><button onclick="A.resetDemo()">Сбросить демо-данные</button></div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button class="burger" aria-label="Меню" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <form class="search" onsubmit="return A.search(event)" role="search">${ICON_SEARCH}<input name="q" placeholder="Поиск по номеру, напр. IT-2026-00001" aria-label="Поиск заявки по номеру"></form>
+      <div class="top-r">
+        <div class="bell-wrap" style="position:relative"><button class="icon-btn" aria-label="Уведомления" onclick="A.toggleBell(event)">${ICON_BELL}${unread?`<span class="dot">${unread}</span>`:''}</button>${UI.bell?bellDD():''}</div>
+        <div class="menu-wrap" style="position:relative"><button class="user-btn" onclick="A.toggleMenu(event)"><span class="avatar">${initials(u)}</span><span class="nm">${esc(shortName(u))}<br><small>${u.roles.filter(r=>r!=='employee').map(r=>ROLE_NAMES[r]).join(', ')||'Сотрудник'}</small></span></button>${UI.menu?menuDD():''}</div>
+      </div>
+    </header>
+    <main class="content" id="content">${body}</main>
+  </div></div>`;
+}
+function bellDD(){
+  const list = DB.notifications.filter(n=>n.userId===me().id).slice(0,30);
+  return `<div class="dropdown" id="bellDD"><div class="dd-h">Уведомления <button class="btn btn-sm" onclick="A.readAll()">Прочитать все</button></div>
+  ${list.length?list.map(n=>`<button class="dd-item ${n.read?'':'unread'}" onclick="A.openNotif('${n.id}')">${esc(n.text)}<small>${fmtDT(n.t)}</small></button>`).join(''):'<div class="empty">Уведомлений нет</div>'}</div>`;
+}
+function menuDD(){
+  const u=me();
+  return `<div class="dropdown" id="menuDD" style="width:300px">
+  <div class="dd-h" style="flex-direction:column;align-items:flex-start">${esc(u.name)}<small class="muted" style="font-weight:400">${esc(u.position)}</small></div>
+  <a class="dd-item" href="#/profile">Профиль и настройки</a>
+  <button class="dd-item" onclick="A.logout()">Выйти</button>
+  <div class="dd-h small muted" style="font-weight:500">Демо: войти как…</div>
+  ${DB.users.filter(x=>x.active&&x.id!==u.id).map(x=>`<button class="dd-item" onclick="A.switchUser('${x.id}')">${esc(shortName(x))}<small>${x.roles.map(r=>ROLE_NAMES[r]).join(', ')}</small></button>`).join('')}
+  </div>`;
+}
+function afterRender(page){
+  if(page==='new'||page==='edit') A.formCalc();
+}
+
+/* ================== Таблица заявок ================== */
+function reqTable(list, opt={}){
+  if(!list.length) return `<div class="empty">${opt.empty||'Заявок не найдено'}</div>`;
+  const cols = opt.cols || ['num','type','author','status','created','sla','assignee'];
+  const H = {sel:'',num:'Номер',type:'Тип заявки',author:'Заявитель',status:'Статус',created:'Создана',sla:'SLA',assignee:'Исполнитель',prio:'Приоритет',period:'Период',updated:'Обновлена'};
+  const cell = (c,r) => {
+    switch(c){
+      case 'sel': return `<td onclick="event.stopPropagation()"><input type="checkbox" aria-label="Выбрать ${r.number}" ${UI.sel.has(r.id)?'checked':''} onchange="A.sel('${r.id}',this.checked)"></td>`;
+      case 'num': return `<td><a href="#/req/${r.id}" class="mono">${r.number}</a></td>`;
+      case 'type': return `<td>${esc(T(r.typeId).name)}<div class="small muted">${esc(C(catOf(r)).name)}</div></td>`;
+      case 'author': return `<td>${esc(shortName(U(r.authorId)))}<div class="small muted">${esc(D(U(r.authorId).dept)?.name||'')}</div></td>`;
+      case 'status': return `<td>${statusBadge(r.status)}</td>`;
+      case 'created': return `<td class="small">${fmtDT(r.createdAt)}</td>`;
+      case 'updated': return `<td class="small">${fmtDT(r.updatedAt)}</td>`;
+      case 'sla': return `<td>${slaHtml(r)}</td>`;
+      case 'assignee': return `<td>${r.assigneeId?esc(shortName(U(r.assigneeId))):'<span class="muted">—</span>'}</td>`;
+      case 'prio': return `<td>${prioBadge(r.priority)}</td>`;
+      case 'period': { const p=periodOf(r); return `<td class="small">${p?fmtD(p.from)+' – '+fmtD(p.to):'—'}</td>`; }
+    }
+  };
+  return `<div class="tbl-wrap"><table class="tbl"><thead><tr>${cols.map(c=>`<th>${c==='sel'?`<input type="checkbox" aria-label="Выбрать все" onchange="A.selAll(this.checked,[${list.map(r=>`'${r.id}'`).join(',')}])">`:H[c]}</th>`).join('')}</tr></thead>
+  <tbody>${list.map(r=>`<tr class="click ${isOverdue(r)?'overdue':''}" onclick="go('req/${r.id}')">${cols.map(c=>cell(c,r)).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ================== Страницы ================== */
+function pLogin(){
+  const groups = DB.users.filter(u=>u.active).map(u=>`<button type="button" onclick="A.fillDemo('${u.login}')"><span>${esc(shortName(u))}<br><small class="muted">${esc(u.position)}</small></span><span class="chip">${u.roles.filter(r=>r!=='employee').map(r=>ROLE_NAMES[r]).join(', ')||'Сотрудник'}</span></button>`).join('');
+  return `<div class="login-wrap">
+  <div class="login-hero">
+    <div class="brand" style="border:0;padding:0"><div class="logo">OG</div><div><b>${esc(DB.company)}</b><small>Корпоративный портал</small></div></div>
+    <div><h2>Единая точка подачи и согласования внутренних заявок</h2>
+    <ul><li>Отпуска, справки и командировки</li><li>ИТ-инциденты, оборудование и доступы</li><li>Хозяйственное обслуживание и переговорные</li><li>Прозрачный маршрут: сотрудник → руководитель → исполнитель</li></ul></div>
+    <small>Прототип по PRD v1.0 · 02.10.2026</small>
+  </div>
+  <div class="login-side"><div class="login-card">
+    <h1>Вход в портал</h1><p class="muted" style="margin-top:-6px">Используйте корпоративный e-mail или логин</p>
+    <form onsubmit="return A.login(event)" novalidate>
+      <div class="field"><label for="lg">Логин или e-mail</label><input id="lg" name="login" autocomplete="username" required></div>
+      <div class="field"><label for="pw">Пароль</label><input id="pw" name="pw" type="password" autocomplete="current-password" required></div>
+      <div id="loginErr" class="ferr" role="alert" style="margin:-4px 0 10px"></div>
+      <button class="btn btn-accent btn-block">Войти</button>
+      <p class="small" style="text-align:center"><a href="javascript:void 0" onclick="A.forgot()">Забыли пароль?</a></p>
+    </form>
+    <div class="demo"><b>Демо-доступ</b> <span class="muted small">— пароль для всех: <span class="mono">${DEMO_PASSWORD}</span></span>
+      <div class="demo-list">${groups}</div></div>
+  </div></div></div>`;
+}
+
+function pHome(){
+  const u=me(), mine=DB.requests.filter(r=>r.authorId===u.id);
+  const cnt = s => mine.filter(r=>s.includes(r.status)).length;
+  const notifs = DB.notifications.filter(n=>n.userId===u.id).slice(0,6);
+  const extra = [];
+  if(has(u,'head')||has(u,'admin')) extra.push(`<a class="kpi" href="#/approvals"><div class="v">${approvalsFor(u).length}</div><div class="l">Ждут вашего согласования</div></a>`);
+  if(has(u,'manager')||has(u,'admin')){ const q=queueFor(u); extra.push(`<a class="kpi" href="#/queue"><div class="v">${q.filter(r=>r.status==='new').length}</div><div class="l">Новых в очереди</div></a>`); extra.push(`<a class="kpi" href="#/queue"><div class="v" style="color:var(--err)">${q.filter(isOverdue).length}</div><div class="l">Просрочено по SLA</div></a>`); }
+  const favs = u.favorites.map(T).filter(t=>t&&t.active);
+  return `<div class="page-h"><div><div class="crumbs">${new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})}</div><h1>Добрый день, ${esc(u.name.split(' ')[1]||u.name)}</h1></div>
+    <a class="btn btn-accent" href="#/catalog">+ Создать заявку</a></div>
+  <div class="grid g4" style="margin-bottom:16px">
+    <a class="kpi" href="#/my"><div class="v">${cnt(['pending_approval','returned'])}</div><div class="l">На согласовании / доработке</div></a>
+    <a class="kpi" href="#/my"><div class="v">${cnt(['new','in_progress','waiting_info'])}</div><div class="l">В работе у исполнителей</div></a>
+    <a class="kpi" href="#/my"><div class="v">${cnt(['done'])}</div><div class="l">Выполнено, ждут подтверждения</div></a>
+    <a class="kpi" href="#/new/hr_vac"><div class="v">${vacLeft(u)} <small style="font-size:14px;font-weight:500">${plural(vacLeft(u),'день','дня','дней')}</small></div><div class="l">Остаток отпуска</div></a>
+    ${extra.join('')}
+  </div>
+  <div class="split">
+    <div class="card"><div class="card-h"><h2>Последние заявки</h2><a href="#/my">Все заявки →</a></div>
+      ${reqTable(mine.slice().sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,6),{cols:['num','type','status','updated','sla'],empty:'У вас пока нет заявок. <a href="#/catalog">Создать первую</a>'})}</div>
+    <div>
+      ${favs.length?`<div class="card"><h3>Избранное</h3>${favs.map(t=>`<a class="btn btn-block" style="justify-content:flex-start;margin-bottom:6px" href="#/new/${t.id}">${esc(t.name)}</a>`).join('')}</div>`:''}
+      <div class="card"><div class="card-h"><h3>Уведомления</h3><button class="btn btn-sm" onclick="A.readAll()">Прочитать все</button></div>
+      ${notifs.length?notifs.map(n=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><a href="javascript:void 0" onclick="A.openNotif('${n.id}')" style="${n.read?'color:var(--text)':'font-weight:600'}">${esc(n.text)}</a><div class="small muted">${fmtDT(n.t)}</div></div>`).join(''):'<div class="muted">Новых уведомлений нет</div>'}</div>
+    </div>
+  </div>`;
+}
+
+function catList(){
+  const u=me(), q=UI.catQ.trim().toLowerCase();
+  const cats = DB.categories.filter(c=>c.active).map(c=>{
+    const types = DB.types.filter(t=>t.cat===c.id && t.active && (!q || t.name.toLowerCase().includes(q)));
+    if(!types.length) return '';
+    return `<div class="card" style="margin:0"><div class="cat-h"><div class="cat-ic" style="background:${CAT_COLORS[c.id]||'#3E5C76'}">${esc(c.id)}</div><div><h3 style="margin:0">${esc(c.name)}</h3><div class="small muted">${esc(c.desc||'')}</div></div></div>
+      ${types.map(t=>`<div class="type-item"><a href="#/new/${t.id}">${esc(t.name)}${t.approval?' <span class="chip">согласование</span>':''}</a><button class="star ${u.favorites.includes(t.id)?'on':''}" title="В избранное" aria-label="Избранное" onclick="A.fav('${t.id}')">★</button></div>`).join('')}</div>`;
+  }).join('');
+  return cats || '<div class="empty">Ничего не найдено</div>';
+}
+function pCatalog(){
+  return `<div class="page-h"><h1>Каталог услуг</h1><div class="field" style="margin:0;min-width:260px"><input class="inp" placeholder="Поиск типа заявки…" value="${esc(UI.catQ)}" oninput="A.catSearch(this.value)" aria-label="Поиск по каталогу"></div></div>
+  <div class="cat-grid" id="catList">${catList()}</div>`;
+}
+
+function fieldHtml(f, v, err){
+  const id='f_'+f.key, req=f.req?' <span class="req">*</span>':'';
+  let inp='';
+  switch(f.type){
+    case 'textarea': inp=`<textarea id="${id}" name="${f.key}">${esc(v)}</textarea>`; break;
+    case 'number': inp=`<input id="${id}" name="${f.key}" type="number" min="0" value="${esc(v)}">`; break;
+    case 'date': case 'time': inp=`<input id="${id}" name="${f.key}" type="${f.type}" value="${esc(v)}">`; break;
+    case 'datetime': inp=`<input id="${id}" name="${f.key}" type="datetime-local" value="${esc(v)}">`; break;
+    case 'daterange': inp=`<div class="range"><input id="${id}" name="${f.key}_from" type="date" value="${esc(v?.from)}" aria-label="${esc(f.label)}: с"><span>—</span><input name="${f.key}_to" type="date" value="${esc(v?.to)}" aria-label="${esc(f.label)}: по"></div>`; break;
+    case 'select': inp=`<select id="${id}" name="${f.key}"><option value="">— выберите —</option>${(f.options||[]).map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select>`; break;
+    case 'employee': inp=`<select id="${id}" name="${f.key}"><option value="">— выберите сотрудника —</option>${DB.users.filter(u=>u.active&&u.id!==me().id).map(u=>`<option value="${u.id}" ${u.id===v?'selected':''}>${esc(u.name)}</option>`).join('')}</select>`; break;
+    case 'checkbox': return `<div class="field"><label class="check"><input type="checkbox" name="${f.key}" ${v?'checked':''}> ${esc(f.label)}</label></div>`;
+    case 'file': inp=`<input id="${id}" name="${f.key}" type="file" multiple accept=".${FILE_EXT.join(',.')}"><div class="hint">До ${DB.settings.maxFiles} файлов, до ${DB.settings.maxMb} МБ каждый: ${FILE_EXT.join(', ')}</div>${(v||[]).length?`<div style="margin-top:6px">${v.map(x=>`<span class="file">📎 ${esc(x.name)}</span>`).join('')}</div>`:''}`; break;
+    default: inp=`<input id="${id}" name="${f.key}" value="${esc(v)}">`;
+  }
+  return `<div class="field ${err?'has-err':''}"><label for="${id}">${esc(f.label)}${req}</label>${inp}${err?`<div class="ferr">${esc(err)}</div>`:''}</div>`;
+}
+function formPage(t, r, errors={}){
+  const u=me(), vals = r ? r.form : {};
+  const ap = t.approval ? resolveApprover(r?U(r.authorId):u) : null;
+  const route = !t.approval ? 'Без согласования — сразу в очередь исполнителей' : ap ? `Согласование: ${shortName(U(ap))} → исполнитель ${C(t.cat).name}` : 'Руководитель не назначен — согласование будет пропущено';
+  const returned = r && r.status==='returned' ? r.comments.filter(c=>!c.internal).slice(-1)[0] : null;
+  return `<div class="crumbs"><a href="#/catalog">Каталог</a> / ${esc(C(t.cat).name)}</div>
+  <div class="page-h"><h1>${esc(t.name)}</h1>${r?`<span class="mono muted">${r.number}</span>`:''}</div>
+  ${returned?`<div class="alert a-warn"><b>Возвращено на доработку:</b> ${esc(returned.text)}</div>`:''}
+  <div class="split"><form class="card" id="reqForm" onsubmit="return A.saveForm(event,'${t.id}','${r?r.id:''}')" oninput="A.formCalc()" onchange="A.formCalc()" novalidate>
+    ${t.fields.map(f=>fieldHtml(f, vals[f.key], errors[f.key])).join('')}
+    ${t.vacation==='paid'?'<div id="vacInfo" class="alert a-info"></div>':''}
+    ${errors._?`<div class="alert a-err">${esc(errors._)}</div>`:''}
+    <div class="row" style="justify-content:flex-end;margin-top:6px">
+      <a class="btn" href="${r&&r.id?'#/req/'+r.id:'#/catalog'}">Отмена</a>
+      ${!r||r.status==='draft'?'<button class="btn" name="mode" value="draft">Сохранить черновик</button>':''}
+      <button class="btn btn-accent" name="mode" value="send">${r&&r.status==='returned'?'Отправить повторно':'Отправить заявку'}</button>
+    </div>
+  </form>
+  <div class="card"><h3>Маршрут заявки</h3><p class="small">${esc(route)}</p>
+    <dl class="side-kv"><dt>Категория</dt><dd>${esc(C(t.cat).name)}</dd><dt>Срок (SLA)</dt><dd>${t.sla} ${plural(t.sla,'час','часа','часов')}</dd><dt>Заявитель</dt><dd>${esc(shortName(r?U(r.authorId):u))}</dd></dl>
+    <p class="small muted" style="margin-bottom:0">Поля, отмеченные <span class="req">*</span>, обязательны.</p></div></div>`;
+}
+function pNew(typeId){ const t=T(typeId); if(!t||!t.active) return p404(); return formPage(t,null); }
+function pEdit(id){ const r=R(id); if(!r) return p404(); if(r.authorId!==me().id||!['draft','returned'].includes(r.status)) return p403(); return formPage(T(r.typeId), r); }
+
+function myFiltered(){
+  const f=UI.my, u=me();
+  return DB.requests.filter(r=>r.authorId===u.id)
+    .filter(r=>!f.cat||catOf(r)===f.cat).filter(r=>!f.status||r.status===f.status)
+    .filter(r=>!f.period||r.createdAt>now()-Number(f.period)*DAY).filter(r=>!f.q||r.number.toLowerCase().includes(f.q.toLowerCase()))
+    .sort((a,b)=>b.createdAt-a.createdAt);
+}
+function filtersHtml(scope, withCat=true){
+  const f=UI[scope];
+  return `<div class="filters">
+    <div class="field"><label class="small" for="fq">Номер</label><input id="fq" class="inp" value="${esc(f.q)}" placeholder="IT-2026-…" oninput="A.filt('${scope}','q',this.value,true)"></div>
+    ${withCat?`<div class="field"><label class="small" for="fc">Категория</label><select id="fc" class="inp" onchange="A.filt('${scope}','cat',this.value)"><option value="">Все</option>${DB.categories.map(c=>`<option value="${c.id}" ${f.cat===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>`:''}
+    <div class="field"><label class="small" for="fs">Статус</label><select id="fs" class="inp" onchange="A.filt('${scope}','status',this.value)"><option value="">Все</option>${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${f.status===k?'selected':''}>${v[0]}</option>`).join('')}</select></div>
+    ${'period' in f?`<div class="field"><label class="small" for="fp">Период</label><select id="fp" class="inp" onchange="A.filt('${scope}','period',this.value)"><option value="">Всё время</option>${[[7,'7 дней'],[30,'30 дней'],[90,'90 дней'],[365,'Год']].map(([v,l])=>`<option value="${v}" ${f.period==v?'selected':''}>${l}</option>`).join('')}</select></div>`:''}
+  </div>`;
+}
+function pMy(){
+  return `<div class="page-h"><h1>Мои заявки</h1><a class="btn btn-accent" href="#/catalog">+ Создать заявку</a></div>
+  <div class="card">${filtersHtml('my')}<div id="list">${reqTable(myFiltered(),{cols:['num','type','status','created','sla','assignee']})}</div></div>`;
+}
+
+function stepper(r){
+  const t=T(r.typeId), needAp = t.approval && (r.approverId || r.status==='pending_approval' || r.status==='returned');
+  const steps = ['Создана'].concat(needAp?['Согласование']:[]).concat(['В очереди','В работе','Выполнено','Закрыто']);
+  const idx = {draft:0,pending_approval:1,returned:1,new:needAp?2:1,in_progress:needAp?3:2,waiting_info:needAp?3:2,done:needAp?4:3,closed:steps.length}[r.status];
+  if(idx===undefined) return '';
+  return `<div class="stepper">${steps.map((s,i)=>`<div class="step ${i<idx?'done':i===idx?(r.status==='returned'||r.status==='waiting_info'?'warn cur':'cur'):''}"><div class="c">${i<idx?'✓':i+1}</div><span>${s}</span></div>`).join('')}</div>`;
+}
+function fmtVal(f,v){
+  if(v==null||v===''||(Array.isArray(v)&&!v.length)) return '<span class="muted">—</span>';
+  switch(f.type){
+    case 'daterange': return `${fmtD(v.from)} — ${fmtD(v.to)}`;
+    case 'date': return fmtD(v);
+    case 'datetime': return esc(v.replace('T',' '));
+    case 'checkbox': return v?'Да':'Нет';
+    case 'employee': return esc(U(v)?.name||'—');
+    case 'file': return v.map(x=>`<span class="file">📎 ${esc(x.name)}</span>`).join('');
+    default: return esc(v);
+  }
+}
+function reqActions(r){
+  const u=me(), t=T(r.typeId), isAuthor=r.authorId===u.id, isMgr=isCatManager(u,t.cat), b=[];
+  if(r.status==='pending_approval' && (r.approverId===u.id || has(u,'admin'))){
+    b.push(`<button class="btn btn-ok" onclick="A.approve('${r.id}')">Согласовать</button>`);
+    b.push(`<button class="btn" onclick="A.returnReq('${r.id}')">Вернуть на доработку</button>`);
+    b.push(`<button class="btn btn-danger" onclick="A.reject('${r.id}')">Отклонить</button>`);
+  }
+  if(isMgr){
+    if(r.status==='new') b.push(`<button class="btn btn-primary" onclick="A.take('${r.id}')">Взять в работу</button>`);
+    if(['new','in_progress','waiting_info'].includes(r.status)) b.push(`<button class="btn" onclick="A.assign('${r.id}')">Назначить исполнителя</button>`);
+    if(r.status==='in_progress'){ b.push(`<button class="btn btn-ok" onclick="A.done('${r.id}')">Отметить выполненной</button>`); b.push(`<button class="btn" onclick="A.askInfo('${r.id}')">Запросить информацию</button>`); }
+    if(r.status==='waiting_info') b.push(`<button class="btn" onclick="A.resume('${r.id}')">Вернуть в работу</button>`);
+    if(ACTIVE.includes(r.status)){ b.push(`<button class="btn" onclick="A.prio('${r.id}')">Изменить приоритет</button>`); b.push(`<button class="btn btn-danger" onclick="A.mreject('${r.id}')">Отклонить</button>`); }
+  }
+  if(isAuthor){
+    if(['draft','returned'].includes(r.status)) b.push(`<a class="btn btn-accent" href="#/edit/${r.id}">${r.status==='draft'?'Редактировать и отправить':'Исправить и отправить'}</a>`);
+    if(r.status==='done'){ b.push(`<button class="btn btn-ok" onclick="A.rate('${r.id}')">Подтвердить и оценить</button>`); b.push(`<button class="btn" onclick="A.reopen('${r.id}')">Не согласен — возобновить</button>`); }
+    if(['draft','pending_approval','returned','new'].includes(r.status)) b.push(`<button class="btn" onclick="A.cancel('${r.id}')">Отозвать заявку</button>`);
+  }
+  return b.length?`<div class="card"><h3>Действия</h3><div class="actions">${b.join('')}</div></div>`:'';
+}
+function pReq(id){
+  const r=R(id); if(!r) return p404(); const u=me();
+  if(!canView(r,u)){ audit('Отказ в доступе (403)','Request',r.number,'Попытка открыть чужую заявку'); save(); return p403(); }
+  const t=T(r.typeId), author=U(r.authorId), seeInternal=isCatManager(u,t.cat);
+  const comments = r.comments.filter(c=>!c.internal||seeInternal);
+  let warn='';
+  if(t.vacation && r.status==='pending_approval' && (r.approverId===u.id||has(u,'admin'))){
+    const o=vacOverlap(r); if(o && o.names.length) warn=`<div class="alert ${o.ratio>0.3?'a-err':'a-warn'}"><b>Пересечение отпусков:</b> ${esc(o.names.join(', '))} ${o.ratio>0.3?`В отпуске одновременно окажутся ${Math.round(o.ratio*100)}% сотрудников подразделения (порог — 30%).`:''} <a href="#/calendar">Открыть календарь</a></div>`;
+  }
+  const finalBanner = r.status==='rejected'?'<div class="alert a-err">Заявка отклонена.</div>':r.status==='cancelled'?'<div class="alert a-info">Заявка отозвана заявителем.</div>':'';
+  const p=periodOf(r);
+  return `<div class="crumbs"><a href="#/my">Заявки</a> / ${esc(C(t.cat).name)}</div>
+  <div class="page-h"><div><h1 style="margin-bottom:4px">${esc(t.name)}</h1><span class="mono muted">${r.number}</span> · ${statusBadge(r.status)} ${isOverdue(r)?'<span class="badge b-err">SLA нарушен</span>':''}</div></div>
+  ${warn}${finalBanner}
+  <div class="split"><div>
+    <div class="card">${stepper(r)||'<div class="muted small">Маршрут прерван</div>'}</div>
+    <div class="card"><h2>Данные заявки</h2><dl class="kv">${t.fields.map(f=>`<dt>${esc(f.label)}</dt><dd>${fmtVal(f,r.form[f.key])}</dd>`).join('')}
+      ${t.vacation==='paid'&&p?`<dt>Количество дней</dt><dd>${vacDays(p.from,p.to)} (без учёта праздничных дней)</dd>`:''}
+      ${r.order?`<dt>Приказ</dt><dd>№ ${esc(r.order.no)} от ${fmtD(r.order.date)}</dd>`:''}
+      ${r.rating?`<dt>Оценка</dt><dd><span style="color:var(--accent)">${'★'.repeat(r.rating)}</span><span style="color:#C7D0DA">${'★'.repeat(5-r.rating)}</span> ${esc(r.ratingComment)}</dd>`:''}
+    </dl>${r.attachments.length?`<div style="margin-top:12px"><div class="lbl">Вложения</div>${r.attachments.map(a=>`<span class="file">📎 ${esc(a.name)} <span class="muted small">${Math.round(a.size/1024)} КБ</span></span>`).join('')}</div>`:''}</div>
+    <div class="card"><h2>Комментарии <span class="muted" style="font-weight:400">${comments.length}</span></h2>
+      ${comments.map(c=>`<div class="comment ${c.internal?'internal':''}"><div class="h"><b>${esc(U(c.userId)?.name||'Система')}</b><span>${c.internal?'внутренний · ':''}${fmtDT(c.t)}</span></div><div class="t">${esc(c.text)}</div></div>`).join('')||'<p class="muted">Комментариев пока нет</p>'}
+      ${!['closed','cancelled','rejected'].includes(r.status)?`<form onsubmit="return A.comment(event,'${r.id}')" style="margin-top:12px">
+        ${seeInternal&&DB.templates.length?`<select class="inp" style="margin-bottom:8px" onchange="if(this.value){this.form.text.value+=this.value;this.value=''}" aria-label="Шаблон ответа"><option value="">Шаблоны быстрых ответов…</option>${DB.templates.map(x=>`<option value="${esc(x)}">${esc(x.slice(0,60))}</option>`).join('')}</select>`:''}
+        <div class="field" style="margin-bottom:8px"><textarea name="text" aria-label="Текст комментария" placeholder="${r.status==='waiting_info'&&r.authorId===u.id?'Ответьте на запрос исполнителя — заявка вернётся в работу':'Написать комментарий…'}" style="min-height:70px"></textarea></div>
+        <div class="row" style="justify-content:space-between"><div class="row">${seeInternal?'<label class="check small"><input type="checkbox" name="internal"> Внутренний (только для исполнителей)</label>':''}<input type="file" name="files" multiple class="small" aria-label="Вложения" accept=".${FILE_EXT.join(',.')}"></div><button class="btn btn-primary">Отправить</button></div>
+      </form>`:''}
+    </div>
+  </div><div>
+    ${reqActions(r)}
+    <div class="card"><h3>Сведения</h3><dl class="side-kv">
+      <dt>Заявитель</dt><dd>${esc(author.name)}<div class="small muted">${esc(author.position)}</div></dd>
+      <dt>Подразделение</dt><dd>${esc(D(author.dept)?.name)}</dd>
+      ${r.approverId?`<dt>Согласующий</dt><dd>${esc(shortName(U(r.approverId)))}</dd>`:''}
+      <dt>Исполнитель</dt><dd>${r.assigneeId?esc(shortName(U(r.assigneeId))):'<span class="muted">не назначен</span>'}</dd>
+      <dt>Приоритет</dt><dd>${prioBadge(r.priority)}</dd>
+      <dt>Создана</dt><dd>${fmtDT(r.createdAt)}</dd>
+      <dt>SLA</dt><dd>${slaHtml(r)}</dd>
+    </dl></div>
+    <div class="card"><h3>История</h3><ul class="timeline">${r.history.slice().reverse().map(h=>`<li>${esc(h.action)}<small>${h.userId?esc(shortName(U(h.userId)))+' · ':'Система · '}${fmtDT(h.t)}</small></li>`).join('')}</ul></div>
+  </div></div>`;
+}
+
+function pApprovals(){
+  const list = approvalsFor(me()).sort((a,b)=>a.createdAt-b.createdAt);
+  return `<div class="page-h"><h1>На согласовании</h1>
+    <div class="row"><button class="btn btn-ok" onclick="A.bulkApprove()" ${list.length?'':'disabled'}>Согласовать выбранные</button></div></div>
+  <div class="card">${reqTable(list,{cols:['sel','num','type','author','period','created'],empty:'Нет заявок, ожидающих вашего согласования'})}
+  <p class="small muted" style="margin:12px 0 0">Откройте заявку, чтобы вернуть её на доработку или отклонить — для этих действий обязателен комментарий.</p></div>`;
+}
+function deptScope(){ const u=me(); if(has(u,'admin')) return DB.requests.filter(r=>r.status!=='draft'); const s=subordinates(u.id); return DB.requests.filter(r=>s.includes(r.authorId)&&r.status!=='draft'); }
+function deptFiltered(){ const f=UI.dept; return deptScope().filter(r=>!f.status||r.status===f.status).filter(r=>!f.q||r.number.toLowerCase().includes(f.q.toLowerCase())).sort((a,b)=>b.createdAt-a.createdAt); }
+function pDept(){
+  return `<div class="page-h"><h1>Заявки подразделения</h1><a class="btn" href="#/calendar">Календарь отпусков</a></div>
+  <div class="card">${filtersHtml('dept',false)}<div id="list">${reqTable(deptFiltered(),{cols:['num','type','author','status','created','sla','assignee']})}</div></div>`;
+}
+
+function pCalendar(){
+  const u=me();
+  const deptOptions = has(u,'admin') ? DB.departments : DB.departments.filter(d=>d.head===u.id || DB.users.some(x=>x.dept===d.id && subordinates(u.id).includes(x.id)));
+  if(!UI.calDept || !deptOptions.some(d=>d.id===UI.calDept)) UI.calDept = (deptOptions.find(d=>d.head===u.id)||deptOptions[0]||{}).id;
+  const members = DB.users.filter(x=>x.active && x.dept===UI.calDept);
+  const base = new Date(); base.setDate(1); base.setMonth(base.getMonth()+UI.calMonth);
+  const y=base.getFullYear(), m=base.getMonth(), nd=new Date(y,m+1,0).getDate();
+  const days=[...Array(nd)].map((_,i)=>{ const d=new Date(y,m,i+1); return {iso:isoDate(d), n:i+1, we:[0,6].includes(d.getDay())||HOLIDAYS.includes(isoDate(d))}; });
+  const vac = DB.requests.filter(r=>T(r.typeId).vacation && !['draft','rejected','cancelled'].includes(r.status) && members.some(x=>x.id===r.authorId));
+  const state = (uid_,iso) => { let st=''; vac.filter(r=>r.authorId===uid_).forEach(r=>{ const p=periodOf(r); if(p&&p.from<=iso&&p.to>=iso) st = ['pending_approval','returned'].includes(r.status)&&st!=='v' ? 'vp' : 'v'; }); return st; };
+  const hot = days.map(d=>members.filter(x=>state(x.id,d.iso)).length/Math.max(1,members.length)>0.3);
+  return `<div class="page-h"><h1>Календарь отпусков</h1>
+    <div class="row"><select class="inp" style="width:auto" onchange="UI.calDept=this.value;render()" aria-label="Подразделение">${deptOptions.map(d=>`<option value="${d.id}" ${d.id===UI.calDept?'selected':''}>${esc(d.name)}</option>`).join('')}</select>
+    <button class="btn" onclick="UI.calMonth--;render()" aria-label="Предыдущий месяц">‹</button><b style="min-width:130px;text-align:center">${base.toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}</b><button class="btn" onclick="UI.calMonth++;render()" aria-label="Следующий месяц">›</button></div></div>
+  ${hot.some(Boolean)?'<div class="alert a-err">В отмеченные красным дни в отпуске более 30% сотрудников подразделения.</div>':''}
+  <div class="card"><div class="tbl-wrap"><table class="cal"><thead><tr><th style="text-align:left;padding:0 10px">Сотрудник</th>${days.map((d,i)=>`<th class="${d.we?'we':''} ${hot[i]?'hot':''}">${d.n}</th>`).join('')}</tr></thead>
+  <tbody>${members.map(x=>`<tr><td class="name">${esc(shortName(x))}</td>${days.map(d=>{ const s=state(x.id,d.iso); return `<td class="${s||(d.we?'we':'')}" title="${s?esc(shortName(x))+': '+(s==='v'?'отпуск':'на согласовании'):''}"></td>`; }).join('')}</tr>`).join('')}</tbody></table></div>
+  <div class="legend"><span><i style="background:var(--secondary)"></i>Отпуск согласован</span><span><i style="background:repeating-linear-gradient(45deg,#9FB3C6,#9FB3C6 4px,#C9D6E2 4px,#C9D6E2 8px)"></i>На согласовании</span><span><i style="background:#EEF1F4;border:1px solid var(--border)"></i>Выходной / праздник</span><span><i style="background:var(--err-bg)"></i>Пересечение &gt; 30%</span></div></div>`;
+}
+
+function pQueue(){
+  const u=me(), q=queueFor(u);
+  const tabs = {new:['Новые',r=>r.status==='new'], mine:['Мои в работе',r=>r.status==='in_progress'&&r.assigneeId===u.id], waiting:['Ожидают информации',r=>r.status==='waiting_info'], all:['Все по категории',()=>true], overdue:['Просроченные',isOverdue]};
+  const pr = p => PRIOS.length-PRIOS.indexOf(p);
+  const list = q.filter(tabs[UI.queueTab][1]).sort((a,b)=>(ACTIVE.includes(b.status)-ACTIVE.includes(a.status)) || pr(a.priority)-pr(b.priority) || (a.slaDue||Infinity)-(b.slaDue||Infinity));
+  const cats = has(u,'admin')?'все категории':u.mgrCats.map(c=>C(c).name).join(', ');
+  return `<div class="page-h"><div><h1>Очередь заявок</h1><div class="muted small">Категории: ${esc(cats)}</div></div><button class="btn" onclick="A.exportList('queue')">Экспорт в Excel (CSV)</button></div>
+  <nav class="tabs">${Object.entries(tabs).map(([k,[l,fn]])=>{ const n=q.filter(fn).length; return `<a href="javascript:void 0" class="${UI.queueTab===k?'active':''}" onclick="UI.queueTab='${k}';render()">${l}${n?` <span class="badge b-${k==='overdue'?'err':'muted'}">${n}</span>`:''}</a>`; }).join('')}</nav>
+  <div class="card">${reqTable(list,{cols:['num','type','author','prio','status','sla','assignee']})}</div>`;
+}
+
+function bars(rows){ const max=Math.max(1,...rows.map(r=>r[1])); return `<div class="bars">${rows.map(([l,v,c])=>`<div class="bar-row"><span class="bar-l" title="${esc(l)}">${esc(l)}</span><div class="bar-t"><div class="bar-f" style="width:${v/max*100}%;${c?`background:${c}`:''}"></div></div><span class="bar-v">${v}</span></div>`).join('')}</div>`; }
+function pReports(){
+  const u=me(), period=Number(UI.reportPeriod);
+  const all = reportScope(u).filter(r=>!period||r.createdAt>now()-period*DAY);
+  const approved = all.filter(r=>r.approvedAt), finished = all.filter(r=>r.doneAt&&r.newAt), withSla = all.filter(r=>r.slaDue&&(['done','closed'].includes(r.status)||isOverdue(r)));
+  const breached = withSla.filter(r=>['done','closed'].includes(r.status)?(r.doneAt>r.slaDue):true);
+  const rated = all.filter(r=>r.rating);
+  const avg = (arr,fn) => arr.length?arr.reduce((s,x)=>s+fn(x),0)/arr.length:0;
+  const execs = [...new Set(all.map(r=>r.assigneeId).filter(Boolean))].map(id=>{ const rs=all.filter(r=>r.assigneeId===id); const fin=rs.filter(r=>r.doneAt); const rt=rs.filter(r=>r.rating); return {u:U(id),n:rs.length,fin:fin.length,avg:avg(fin,r=>r.doneAt-r.newAt),rating:rt.length?avg(rt,r=>r.rating):null,over:rs.filter(r=>isOverdue(r)||(r.doneAt&&r.slaDue&&r.doneAt>r.slaDue)).length}; });
+  const days=[...Array(14)].map((_,i)=>{ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-13+i); return d; });
+  const perDay = days.map(d=>reportScope(u).filter(r=>r.createdAt>=d.getTime()&&r.createdAt<d.getTime()+DAY).length);
+  const maxD = Math.max(1,...perDay);
+  const scopeTxt = has(u,'admin')?'вся компания':[has(u,'head')?'ваше подразделение':'',has(u,'manager')?'категории: '+u.mgrCats.map(c=>C(c).name).join(', '):''].filter(Boolean).join(' + ');
+  return `<div class="page-h"><div><h1>Отчёты</h1><div class="small muted">Область: ${esc(scopeTxt)}</div></div>
+    <div class="row"><select class="inp" style="width:auto" onchange="UI.reportPeriod=this.value;render()" aria-label="Период">${[['7','7 дней'],['30','30 дней'],['90','90 дней'],['0','Всё время']].map(([v,l])=>`<option value="${v}" ${UI.reportPeriod===v?'selected':''}>${l}</option>`).join('')}</select>
+    <button class="btn" onclick="A.exportList('report')">Выгрузить в Excel (CSV)</button><button class="btn" onclick="window.print()">PDF / Печать</button></div></div>
+  <div class="grid g4" style="margin-bottom:16px">
+    <div class="kpi"><div class="v">${all.length}</div><div class="l">Заявок за период</div></div>
+    <div class="kpi"><div class="v">${approved.length?hrs(avg(approved,r=>r.approvedAt-r.createdAt)):'—'}</div><div class="l">Среднее время согласования</div></div>
+    <div class="kpi"><div class="v">${finished.length?hrs(avg(finished,r=>r.doneAt-r.newAt)):'—'}</div><div class="l">Среднее время исполнения</div></div>
+    <div class="kpi"><div class="v" style="color:${breached.length?'var(--err)':'var(--ok)'}">${withSla.length?Math.round(breached.length/withSla.length*100)+'%':'—'}</div><div class="l">Доля нарушений SLA</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card" style="margin:0"><h3>По категориям</h3>${bars(DB.categories.map(c=>[c.name,all.filter(r=>catOf(r)===c.id).length,CAT_COLORS[c.id]]))}</div>
+    <div class="card" style="margin:0"><h3>По статусам</h3>${bars(Object.keys(STATUS).filter(s=>s!=='draft').map(s=>[STATUS[s][0],all.filter(r=>r.status===s).length,`var(--${STATUS[s][1]==='muted'?'secondary':STATUS[s][1]==='primary'?'primary':STATUS[s][1]})`]).filter(x=>x[1]))}</div>
+    <div class="card" style="margin:0"><h3>По подразделениям</h3>${bars(DB.departments.map(d=>[d.name,all.filter(r=>U(r.authorId).dept===d.id).length]).filter(x=>x[1]))}</div>
+    <div class="card" style="margin:0"><h3>Поступление заявок за 14 дней</h3><div class="cols">${perDay.map((v,i)=>`<div class="col" title="${fmtD(days[i])}: ${v}">${v||''}<div class="f ${i===13?'today':''}" style="height:${v/maxD*100}%"></div></div>`).join('')}</div><div class="col-lbls">${days.map(d=>`<span>${d.getDate()}</span>`).join('')}</div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Загрузка и эффективность исполнителей</h3>
+    ${execs.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Исполнитель</th><th>Заявок</th><th>Выполнено</th><th>Среднее время</th><th>Нарушений SLA</th><th>Средняя оценка</th></tr></thead><tbody>
+    ${execs.sort((a,b)=>b.n-a.n).map(e=>`<tr><td>${esc(e.u.name)}</td><td>${e.n}</td><td>${e.fin}</td><td>${e.fin?hrs(e.avg):'—'}</td><td>${e.over?`<span class="badge b-err">${e.over}</span>`:'0'}</td><td>${e.rating?e.rating.toFixed(1)+' ★':'—'}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Нет данных</div>'}
+    <p class="small muted" style="margin-bottom:0">Средняя оценка по всем закрытым заявкам: ${rated.length?avg(rated,r=>r.rating).toFixed(1)+' из 5':'—'}</p></div>`;
+}
+
+function pAdmin(){
+  const tabs = {users:'Пользователи', org:'Оргструктура', catalog:'Каталог услуг', audit:'Журнал аудита', settings:'Настройки'};
+  const content = {users:adminUsers, org:adminOrg, catalog:adminCatalog, audit:adminAudit, settings:adminSettings}[UI.adminTab]();
+  return `<div class="page-h"><h1>Администрирование</h1></div>
+  <nav class="tabs">${Object.entries(tabs).map(([k,l])=>`<a href="javascript:void 0" class="${UI.adminTab===k?'active':''}" onclick="UI.adminTab='${k}';render()">${l}</a>`).join('')}</nav>${content}`;
+}
+function userStatus(u){ if(!u.active) return '<span class="badge b-err">Заблокирован</span>'; if(u.lockedUntil>now()) return `<span class="badge b-warn">Блок до ${new Date(u.lockedUntil).toTimeString().slice(0,5)}</span>`; return '<span class="badge b-ok">Активен</span>'; }
+function adminUsers(){
+  return `<div class="card"><div class="card-h"><h2>Пользователи <span class="muted" style="font-weight:400">${DB.users.length}</span></h2><div class="row"><button class="btn" onclick="A.importUsers()">Импорт CSV</button><button class="btn btn-accent" onclick="A.editUser('')">+ Добавить</button></div></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>ФИО / логин</th><th>Подразделение</th><th>Руководитель</th><th>Роли</th><th>Отпуск</th><th>Статус</th><th></th></tr></thead><tbody>
+  ${DB.users.map(u=>`<tr><td><b>${esc(u.name)}</b><div class="small muted">${esc(u.login)} · ${esc(u.email)}</div></td><td>${esc(D(u.dept)?.name)}<div class="small muted">${esc(u.position)}</div></td><td>${esc(shortName(U(u.managerId)))}</td>
+  <td>${u.roles.map(r=>`<span class="chip">${ROLE_NAMES[r]}</span>`).join('')}${u.mgrCats.length&&has(u,'manager')?`<div class="small muted">${u.mgrCats.join(', ')}${u.senior?' · старший':''}</div>`:''}</td>
+  <td><input type="number" value="${vacLeft(u)}" min="0" aria-label="Остаток отпуска" onchange="A.setVac('${u.id}',this.value)"></td><td>${userStatus(u)}</td>
+  <td><div class="row" style="flex-wrap:nowrap"><button class="btn btn-sm" onclick="A.editUser('${u.id}')">Изменить</button><button class="btn btn-sm" onclick="A.toggleBlock('${u.id}')">${u.active?'Блок.':'Разблок.'}</button><button class="btn btn-sm" onclick="A.resetPw('${u.id}')">Сброс пароля</button></div></td></tr>`).join('')}
+  </tbody></table></div></div>`;
+}
+function adminOrg(){
+  const tree = p => { const ch=DB.departments.filter(d=>d.parent===p); return ch.length?`<ul>${ch.map(d=>`<li><b>${esc(d.name)}</b> <span class="muted small">— руководитель: ${esc(shortName(U(d.head)))} · ${DB.users.filter(u=>u.dept===d.id).length} сотр.</span>
+    <div style="margin-left:8px">${DB.users.filter(u=>u.dept===d.id).map(u=>`<span class="chip">${esc(shortName(u))} → ${esc(shortName(U(u.managerId)))}</span>`).join('')}</div>${tree(d.id)}</li>`).join('')}</ul>`:''; };
+  return `<div class="card"><div class="card-h"><h2>Оргструктура</h2><button class="btn" onclick="A.addDept()">+ Подразделение</button></div><div class="org">${tree(null)}</div>
+  <p class="small muted">Непосредственный руководитель сотрудника (manager_id) задаётся в карточке пользователя. Стрелка показывает, кому уходят заявки на согласование.</p></div>`;
+}
+function adminCatalog(){
+  return `<div class="card"><div class="card-h"><h2>Типы заявок</h2><a class="btn btn-accent" href="#/builder">+ Новый тип (конструктор форм)</a></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Категория</th><th>Тип заявки</th><th>Полей</th><th>Согласование</th><th>SLA, ч</th><th>Активен</th></tr></thead><tbody>
+  ${DB.types.map(t=>`<tr><td><span class="chip">${esc(t.cat)}</span></td><td>${esc(t.name)}</td><td>${t.fields.length}</td>
+  <td><label class="check"><input type="checkbox" ${t.approval?'checked':''} onchange="A.typeSet('${t.id}','approval',this.checked)"> требуется</label></td>
+  <td><input type="number" min="1" value="${t.sla}" aria-label="SLA" onchange="A.typeSet('${t.id}','sla',Math.max(1,Number(this.value)))"></td>
+  <td><label class="check"><input type="checkbox" ${t.active?'checked':''} onchange="A.typeSet('${t.id}','active',this.checked)"> ${t.active?'да':'нет'}</label></td></tr>`).join('')}
+  </tbody></table></div></div>
+  <div class="card"><h2>Шаблоны быстрых ответов</h2>${DB.templates.map((x,i)=>`<div class="row" style="margin-bottom:6px;flex-wrap:nowrap"><input class="inp" value="${esc(x)}" onchange="DB.templates[${i}]=this.value;save()" aria-label="Шаблон"><button class="btn btn-sm" onclick="DB.templates.splice(${i},1);save();render()">Удалить</button></div>`).join('')}<button class="btn btn-sm" onclick="DB.templates.push('Новый шаблон');save();render()">+ Шаблон</button></div>`;
+}
+function adminAudit(){
+  const q=UI.auditQ.toLowerCase();
+  const list = DB.audit.filter(a=>!q||[a.action,a.entityId,a.payload,U(a.userId)?.name].join(' ').toLowerCase().includes(q)).slice(0,200);
+  return `<div class="card"><div class="card-h"><h2>Журнал аудита</h2><div class="row"><input class="inp" style="width:240px" placeholder="Фильтр…" value="${esc(UI.auditQ)}" onchange="UI.auditQ=this.value;render()" aria-label="Фильтр журнала"><button class="btn" onclick="A.exportAudit()">Экспорт</button></div></div>
+  <p class="small muted" style="margin-top:-6px">Записи журнала недоступны для редактирования и хранятся не менее 3 лет.</p>
+  ${list.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Время</th><th>Пользователь</th><th>Действие</th><th>Объект</th><th>Детали</th><th>IP</th></tr></thead><tbody>
+  ${list.map(a=>`<tr><td class="small">${fmtDT(a.t)}</td><td>${a.userId?esc(shortName(U(a.userId))):'<span class="muted">—</span>'}</td><td>${esc(a.action)}</td><td class="mono small">${esc(a.entity)} ${esc(a.entityId)}</td><td class="small">${esc(a.payload)}</td><td class="mono small">${esc(a.ip)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Записей нет</div>'}</div>`;
+}
+function adminSettings(){
+  const s=DB.settings;
+  return `<form class="card" onsubmit="return A.saveSettings(event)" style="max-width:560px"><h2>Системные настройки</h2>
+  <div class="field"><label for="s1">Название компании</label><input id="s1" name="company" value="${esc(DB.company)}"></div>
+  <div class="field"><label for="s2">Автовыход при неактивности, мин</label><input id="s2" name="idle" type="number" min="5" value="${s.idle}"></div>
+  <div class="field"><label for="s3">Максимум вложений в заявке</label><input id="s3" name="maxFiles" type="number" min="1" value="${s.maxFiles}"></div>
+  <div class="field"><label for="s4">Максимальный размер файла, МБ</label><input id="s4" name="maxMb" type="number" min="1" value="${s.maxMb}"></div>
+  <div class="alert a-info small">Политика паролей: от 10 символов, заглавные и строчные буквы, цифры. Блокировка на 15 минут после 5 неудачных попыток входа.</div>
+  <button class="btn btn-primary">Сохранить</button></form>`;
+}
+function pBuilder(){
+  if(!UI.builder) UI.builder={name:'',cat:'IT',approval:false,sla:16,fields:[{label:'Описание',type:'textarea',req:true,options:''}]};
+  const b=UI.builder;
+  return `<div class="crumbs"><a href="#/admin" onclick="UI.adminTab='catalog'">Администрирование</a> / Каталог</div>
+  <div class="page-h"><h1>Конструктор типа заявки</h1></div>
+  <form class="card" onsubmit="return A.saveType(event)" oninput="A.builderSync(this)" onchange="A.builderSync(this)">
+    <div class="grid g2"><div class="field"><label for="b1">Название типа <span class="req">*</span></label><input id="b1" name="name" value="${esc(b.name)}" placeholder="Например: Заказ визиток"></div>
+    <div class="field"><label for="b2">Категория</label><select id="b2" name="cat">${DB.categories.map(c=>`<option value="${c.id}" ${b.cat===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div></div>
+    <div class="grid g2"><div class="field"><label for="b3">Нормативный срок (SLA), часов</label><input id="b3" name="sla" type="number" min="1" value="${b.sla}"></div>
+    <div class="field"><label class="lbl">&nbsp;</label><label class="check"><input type="checkbox" name="approval" ${b.approval?'checked':''}> Требуется согласование руководителя</label></div></div>
+    <h3 style="margin-top:6px">Поля формы</h3>
+    <div class="builder-row small muted"><span>Подпись поля</span><span>Тип</span><span>Варианты (для списка, через «;»)</span><span>Обяз.</span><span></span></div>
+    ${b.fields.map((f,i)=>`<div class="builder-row"><input name="fl${i}" value="${esc(f.label)}" placeholder="Подпись" aria-label="Подпись поля ${i+1}">
+      <select name="ft${i}" aria-label="Тип поля ${i+1}">${Object.entries(FIELD_TYPES).map(([k,v])=>`<option value="${k}" ${f.type===k?'selected':''}>${v}</option>`).join('')}</select>
+      <input name="fo${i}" value="${esc(f.options)}" placeholder="${f.type==='select'?'Вариант 1; Вариант 2':'—'}" ${f.type==='select'?'':'disabled'} aria-label="Варианты поля ${i+1}">
+      <label class="check" title="Обязательное"><input type="checkbox" name="fr${i}" ${f.req?'checked':''}> </label>
+      <button type="button" class="btn btn-sm" onclick="UI.builder.fields.splice(${i},1);render()" aria-label="Удалить поле">✕</button></div>`).join('')}
+    <button type="button" class="btn btn-sm" onclick="UI.builder.fields.push({label:'',type:'text',req:false,options:''});render()">+ Добавить поле</button>
+    <div id="berr" class="ferr" style="margin-top:10px"></div>
+    <div class="row" style="justify-content:flex-end;margin-top:12px"><a class="btn" href="#/admin" onclick="UI.builder=null">Отмена</a><button class="btn btn-accent">Опубликовать в каталоге</button></div>
+  </form>`;
+}
+function pProfile(){
+  const u=me(), notifTypes={created:'Создание заявки',status:'Изменение статуса',assigned:'Назначен исполнитель',comment:'Новый комментарий',done:'Заявка выполнена',sla:'Приближение и нарушение SLA'};
+  return `<div class="page-h"><h1>Профиль</h1></div>
+  <div class="grid g2" style="align-items:start"><div>
+    <div class="card"><div class="row" style="margin-bottom:14px"><span class="avatar" style="width:52px;height:52px;font-size:18px">${initials(u)}</span><div><h2 style="margin:0">${esc(u.name)}</h2><div class="muted">${esc(u.position)}</div></div></div>
+    <dl class="side-kv"><dt>Подразделение</dt><dd>${esc(D(u.dept)?.name)}</dd><dt>Руководитель</dt><dd>${esc(U(u.managerId)?.name||'—')}</dd><dt>E-mail</dt><dd>${esc(u.email)}</dd><dt>Телефон</dt><dd>${esc(u.phone||'—')}</dd><dt>Роли</dt><dd>${u.roles.map(r=>ROLE_NAMES[r]).join(', ')}</dd><dt>Отпуск</dt><dd>${vacLeft(u)} из ${u.vacTotal} дней</dd></dl>
+    <p class="small muted" style="margin-bottom:0">Данные профиля редактирует администратор.</p></div>
+    ${has(u,'head')?`<form class="card" onsubmit="return A.saveDeputy(event)"><h3>Заместитель на период отсутствия</h3>
+      <div class="field"><label for="dp">Заместитель</label><select id="dp" name="id"><option value="">— не назначен —</option>${DB.users.filter(x=>x.active&&x.id!==u.id).map(x=>`<option value="${x.id}" ${u.deputy?.id===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>
+      <div class="range" style="margin-bottom:14px"><input class="inp" type="date" name="from" value="${esc(u.deputy?.from)}" aria-label="С"><span>—</span><input class="inp" type="date" name="to" value="${esc(u.deputy?.to)}" aria-label="По"></div>
+      <button class="btn btn-primary">Сохранить</button></form>`:''}
+  </div><div>
+    <form class="card" onsubmit="return A.changePw(event)"><h3>Смена пароля</h3>
+      <div class="field"><label for="p1">Текущий пароль</label><input id="p1" name="old" type="password" autocomplete="current-password"></div>
+      <div class="field"><label for="p2">Новый пароль</label><input id="p2" name="nw" type="password" autocomplete="new-password"><div class="hint">Не менее 10 символов, заглавные и строчные буквы, цифры</div></div>
+      <div class="field"><label for="p3">Повторите пароль</label><input id="p3" name="nw2" type="password" autocomplete="new-password"></div>
+      <div id="pwErr" class="ferr" style="margin:-6px 0 10px"></div><button class="btn btn-primary">Изменить пароль</button></form>
+    <form class="card" onchange="A.saveNotif(this)"><h3>E-mail уведомления</h3>
+      ${Object.entries(notifTypes).map(([k,l])=>`<label class="check" style="margin-bottom:8px"><input type="checkbox" name="${k}" ${u.notif[k]===false?'':'checked'}> ${l}</label>`).join('')}
+      <label class="check" style="margin-bottom:8px;opacity:.6"><input type="checkbox" checked disabled> Требуется согласование / запрос информации (обязательные)</label></form>
+  </div></div>`;
+}
+function p403(){ return `<div class="card empty"><h1 style="font-size:48px;color:var(--err);margin:0">403</h1><h2>Доступ запрещён</h2><p>У вас нет прав на просмотр этой страницы или заявки.</p><a class="btn" href="#/home">На главную</a></div>`; }
+function p404(){ return `<div class="card empty"><h1 style="font-size:48px;margin:0">404</h1><h2>Страница не найдена</h2><a class="btn" href="#/home">На главную</a></div>`; }
+
+/* ================== Модальное окно ================== */
+function modal(title, body, onOk, okLabel='Подтвердить', cls='btn-primary'){
+  $('#modal-root').innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><form class="modal" id="mform" novalidate role="dialog" aria-modal="true" aria-label="${esc(title)}"><h2>${esc(title)}</h2>${body}<div class="merr" id="merr" role="alert"></div>
+  <div class="modal-actions"><button type="button" class="btn" onclick="closeModal()">Отмена</button><button class="btn ${cls}">${okLabel}</button></div></form></div>`;
+  const f=$('#mform');
+  f.onsubmit = e => { e.preventDefault(); const fd={}; new FormData(f).forEach((v,k)=>fd[k]=v); const err=onOk(fd,f); if(err){ $('#merr').textContent=err; return; } closeModal(); save(); render(); };
+  const first=f.querySelector('input:not([type=hidden]),textarea,select'); if(first) first.focus();
+}
+function closeModal(){ $('#modal-root').innerHTML=''; }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+const commentField = (label='Комментарий', required=true) => `<div class="field"><label for="mc">${label}${required?' <span class="req">*</span>':''}</label><textarea id="mc" name="comment"></textarea></div>`;
+
+/* ================== Действия ================== */
+const A = {
+  login(e){
+    e.preventDefault(); const f=e.target, login=f.login.value.trim().toLowerCase(), pw=f.pw.value, err=$('#loginErr');
+    const u = DB.users.find(x=>x.login.toLowerCase()===login || x.email.toLowerCase()===login);
+    if(!u){ err.textContent='Неверный логин или пароль'; audit('Неудачная попытка входа','Session',login||'—','Пользователь не найден',null); save(); return false; }
+    if(!u.active){ err.textContent='Учётная запись заблокирована администратором'; return false; }
+    if(u.lockedUntil>now()){ err.textContent=`Учётная запись временно заблокирована до ${new Date(u.lockedUntil).toTimeString().slice(0,5)} после 5 неудачных попыток`; return false; }
+    if(pw!==u.password){
+      u.failed++; audit('Неудачная попытка входа','Session',u.login,`Попытка ${u.failed} из 5`,u.id);
+      if(u.failed>=5){ u.lockedUntil=now()+15*60000; u.failed=0; audit('Блокировка учётной записи на 15 минут','User',u.login,'5 неудачных попыток входа',u.id); err.textContent='Учётная запись заблокирована на 15 минут после 5 неудачных попыток'; }
+      else err.textContent=`Неверный логин или пароль. Осталось попыток: ${5-u.failed}`;
+      save(); return false;
+    }
+    u.failed=0; DB.session={userId:u.id,last:now()}; audit('Вход в систему','Session',u.login,'',u.id); save();
+    go('home'); return false;
+  },
+  fillDemo(login){ $('#lg').value=login; $('#pw').value=DEMO_PASSWORD; $('#pw').focus(); },
+  forgot(){ const v=$('#lg').value.trim(); toast(v?`Ссылка для восстановления пароля отправлена на e-mail пользователя «${v}» (действует 24 ч)`:'Введите логин или e-mail, затем нажмите «Забыли пароль?»'); },
+  logout(){ audit('Выход из системы','Session',me().login); DB.session=null; save(); go('home'); },
+  switchUser(id){ const u=U(id); audit('Выход из системы','Session',me().login); DB.session={userId:id,last:now()}; audit('Вход в систему (демо-переключение)','Session',u.login,'',id); save(); go('home'); toast('Вы вошли как '+shortName(u)); },
+  resetDemo(){ if(!confirm('Сбросить все данные к исходному демо-состоянию?')) return; DB=seed(); save(); go('home'); toast('Демо-данные восстановлены'); },
+  toggleBell(e){ e.stopPropagation(); UI.bell=!UI.bell; UI.menu=false; render(); },
+  toggleMenu(e){ e.stopPropagation(); UI.menu=!UI.menu; UI.bell=false; render(); },
+  readAll(){ DB.notifications.filter(n=>n.userId===me().id).forEach(n=>n.read=true); save(); render(); },
+  openNotif(id){ const n=DB.notifications.find(x=>x.id===id); n.read=true; save(); UI.bell=false; if(n.reqId) go('req/'+n.reqId); else render(); },
+  search(e){ e.preventDefault(); const q=e.target.q.value.trim().toUpperCase(); if(!q) return false; const r=DB.requests.find(x=>x.number.toUpperCase()===q) || DB.requests.find(x=>x.number.toUpperCase().endsWith(q.replace(/^0+/,'').padStart(5,'0'))) ;
+    if(!r) toast('Заявка с номером '+q+' не найдена',true); else go('req/'+r.id); return false; },
+  catSearch(v){ UI.catQ=v; $('#catList').innerHTML=catList(); },
+  fav(id){ const u=me(); const i=u.favorites.indexOf(id); i<0?u.favorites.push(id):u.favorites.splice(i,1); save(); $('#catList').innerHTML=catList(); },
+  filt(scope,key,val,soft){ UI[scope][key]=val; if(soft){ $('#list').innerHTML = reqTable(scope==='my'?myFiltered():deptFiltered(),{cols:scope==='my'?['num','type','status','created','sla','assignee']:['num','type','author','status','created','sla','assignee']}); } else render(); },
+  sel(id,on){ on?UI.sel.add(id):UI.sel.delete(id); },
+  selAll(on,ids){ ids.forEach(id=>on?UI.sel.add(id):UI.sel.delete(id)); document.querySelectorAll('tbody input[type=checkbox]').forEach(c=>c.checked=on); },
+
+  formCalc(){
+    const box=$('#vacInfo'); const f=$('#reqForm'); if(!box||!f) return;
+    const from=f.period_from?.value, to=f.period_to?.value, u=me(), left=vacLeft(u);
+    if(!from||!to){ box.innerHTML=`Остаток отпуска: <b>${left}</b> ${plural(left,'день','дня','дней')}. Выберите даты — количество дней будет рассчитано автоматически.`; box.className='alert a-info'; return; }
+    if(to<from){ box.innerHTML='Дата окончания раньше даты начала'; box.className='alert a-err'; return; }
+    const n=vacDays(from,to), hol=(parseISO(to)-parseISO(from))/DAY+1-n;
+    box.className='alert '+(n>left?'a-err':'a-ok');
+    box.innerHTML=`Количество дней отпуска: <b>${n}</b>${hol?` (исключено праздничных дней: ${hol})`:''}. Остаток после отпуска: <b>${left-n}</b> ${plural(left-n,'день','дня','дней')}.${n>left?' Недостаточно дней отпуска.':''}`;
+  },
+  saveForm(e,typeId,editId){
+    e.preventDefault();
+    const t=T(typeId), f=e.target, mode=(e.submitter&&e.submitter.value)||'send', u=me();
+    const old = editId?R(editId):null; const vals={}, errors={};
+    t.fields.forEach(fd=>{
+      let v;
+      if(fd.type==='daterange'){ v={from:f[fd.key+'_from'].value,to:f[fd.key+'_to'].value}; if(!v.from&&!v.to) v=null; else if(!v.from||!v.to) errors[fd.key]='Укажите обе даты'; else if(v.to<v.from) errors[fd.key]='Дата окончания раньше даты начала'; }
+      else if(fd.type==='checkbox') v=f[fd.key].checked;
+      else if(fd.type==='file'){ const files=[...f[fd.key].files]; const prev=old?.form[fd.key]||[];
+        const bad=files.find(x=>!FILE_EXT.includes(x.name.split('.').pop().toLowerCase())); const big=files.find(x=>x.size>DB.settings.maxMb*1048576);
+        if(bad) errors[fd.key]=`Недопустимый формат: ${bad.name}`; else if(big) errors[fd.key]=`Файл больше ${DB.settings.maxMb} МБ: ${big.name}`; else if(prev.length+files.length>DB.settings.maxFiles) errors[fd.key]=`Не более ${DB.settings.maxFiles} файлов`;
+        v=prev.concat(files.map(x=>({name:x.name,size:x.size}))); }
+      else if(fd.type==='number'){ v=f[fd.key].value===''?'':Number(f[fd.key].value); if(v!==''&&v<0) errors[fd.key]='Значение не может быть отрицательным'; }
+      else v=f[fd.key].value.trim();
+      if(mode==='send' && fd.req && !errors[fd.key] && (v==null||v===''||(Array.isArray(v)&&!v.length))) errors[fd.key]='Обязательное поле';
+      vals[fd.key]=v;
+    });
+    if(mode==='send' && t.vacation==='paid' && vals.period && !errors.period){ const n=vacDays(vals.period.from,vals.period.to); if(n>vacLeft(u)) errors.period=`Запрошено ${n} дн., доступно ${vacLeft(u)}`; if(vals.period.from<isoDate(new Date())) errors.period='Отпуск не может начинаться в прошлом'; }
+    if(mode==='send' && t.id==='aho_room' && vals.timeFrom && vals.timeTo && vals.timeTo<=vals.timeFrom) errors.timeTo='Время окончания должно быть позже начала';
+    if(Object.keys(errors).length){ $('#content').innerHTML=formPage(t, old?Object.assign({},old,{form:vals}):{form:vals,status:'draft',authorId:u.id,number:'',comments:[],id:''}, errors); if(!old) $('#content').querySelector('.page-h .mono')?.remove(); A.formCalc(); $('.has-err input,.has-err select,.has-err textarea')?.focus(); toast('Проверьте заполнение формы',true); return false; }
+    let r = old;
+    if(!r){ DB.seq[t.cat]=(DB.seq[t.cat]||0)+1; r={id:uid(),number:`${t.cat}-${new Date().getFullYear()}-${String(DB.seq[t.cat]).padStart(5,'0')}`,typeId,authorId:u.id,approverId:null,assigneeId:null,status:'draft',priority:'Средний',form:{},createdAt:now(),updatedAt:now(),history:[],comments:[],attachments:[]}; DB.requests.push(r); hist(r,'Создан черновик'); }
+    else hist(r, r.status==='returned'?'Заявка исправлена заявителем':'Черновик изменён');
+    r.form=vals; if(t.fields.some(x=>x.key==='priority') && vals.priority) r.priority=vals.priority;
+    if(mode==='send'){ submitRequest(r); audit('Отправка заявки','Request',r.number,t.name); toast(`Заявка ${r.number} отправлена`); }
+    else toast('Черновик сохранён');
+    save(); go('req/'+r.id); return false;
+  },
+  approve(id){ const r=R(id); setStatus(r,'new','Согласовано руководителем'); r.approvedAt=now(); toQueue(r); notify(r.authorId,r,`Заявка ${r.number} согласована`); save(); render(); toast('Заявка согласована и передана исполнителям'); },
+  bulkApprove(){ const ids=[...UI.sel].filter(id=>R(id)?.status==='pending_approval'); if(!ids.length){ toast('Отметьте заявки в списке',true); return; } ids.forEach(id=>{ const r=R(id); setStatus(r,'new','Согласовано руководителем (массово)'); r.approvedAt=now(); toQueue(r); notify(r.authorId,r,`Заявка ${r.number} согласована`); }); UI.sel.clear(); save(); render(); toast(`Согласовано заявок: ${ids.length}`); },
+  reject(id){ const r=R(id); modal('Отклонить заявку '+r.number, commentField('Причина отклонения'), fd=>{ if(!fd.comment.trim()) return 'Комментарий обязателен'; setStatus(r,'rejected','Отклонено руководителем',fd.comment.trim()); notify(r.authorId,r,`Заявка ${r.number} отклонена`); toast('Заявка отклонена'); },'Отклонить','btn-danger'); },
+  returnReq(id){ const r=R(id); modal('Вернуть на доработку '+r.number, commentField('Что нужно исправить'), fd=>{ if(!fd.comment.trim()) return 'Комментарий обязателен'; setStatus(r,'returned','Возвращено на доработку',fd.comment.trim()); notify(r.authorId,r,`Заявка ${r.number} возвращена на доработку`); toast('Заявка возвращена заявителю'); },'Вернуть'); },
+  take(id){ const r=R(id); r.assigneeId=me().id; setStatus(r,'in_progress','Взята в работу'); notify(r.authorId,r,`Заявка ${r.number} взята в работу (${shortName(me())})`); save(); render(); toast('Заявка взята в работу'); },
+  assign(id){ const r=R(id); const ms=managersOf(catOf(r));
+    modal('Назначить исполнителя', `<div class="field"><label for="ma">Менеджер категории «${esc(C(catOf(r)).name)}»</label><select id="ma" name="who">${ms.map(m=>`<option value="${m.id}" ${m.id===r.assigneeId?'selected':''}>${esc(m.name)}${m.senior?' (старший)':''}</option>`).join('')}</select></div>`, fd=>{
+      r.assigneeId=fd.who; if(r.status==='new') r.status='in_progress'; hist(r,`Назначен исполнитель: ${shortName(U(fd.who))}`); audit('Назначение исполнителя','Request',r.number,shortName(U(fd.who))); notify(fd.who,r,`Вам назначена заявка ${r.number}`); notify(r.authorId,r,`По заявке ${r.number} назначен исполнитель`); toast('Исполнитель назначен'); },'Назначить'); },
+  prio(id){ const r=R(id); modal('Изменить приоритет', `<div class="field"><label for="mp">Приоритет</label><select id="mp" name="p">${PRIOS.map(p=>`<option ${p===r.priority?'selected':''}>${p}</option>`).join('')}</select></div>`, fd=>{ if(fd.p!==r.priority){ hist(r,`Приоритет: ${r.priority} → ${fd.p}`); r.priority=fd.p; } },'Сохранить'); },
+  askInfo(id){ const r=R(id); modal('Запросить информацию у заявителя', commentField('Вопрос заявителю'), fd=>{ if(!fd.comment.trim()) return 'Опишите, какая информация нужна'; setStatus(r,'waiting_info','Запрошена информация у заявителя',fd.comment.trim()); notify(r.authorId,r,`Запрошена информация по заявке ${r.number}`); },'Отправить запрос'); },
+  resume(id){ const r=R(id); setStatus(r,'in_progress','Возвращена в работу'); save(); render(); },
+  done(id){ const r=R(id), t=T(r.typeId);
+    const body = (t.vacation?`<div class="alert a-info small">Для заявок на отпуск укажите реквизиты приказа.</div><div class="grid g2"><div class="field"><label for="on">Номер приказа <span class="req">*</span></label><input id="on" name="no"></div><div class="field"><label for="od">Дата приказа <span class="req">*</span></label><input id="od" name="date" type="date" value="${isoDate(new Date())}"></div></div>`:'')+commentField('Комментарий для заявителя',false);
+    modal('Отметить выполненной', body, fd=>{
+      if(t.vacation && (!fd.no?.trim()||!fd.date)) return 'Укажите номер и дату приказа';
+      if(t.vacation){ r.order={no:fd.no.trim(),date:fd.date}; if(t.vacation==='paid'&&r.form.period){ const a=U(r.authorId); a.vacUsed+=vacDays(r.form.period.from,r.form.period.to); } }
+      r.doneAt=now(); setStatus(r,'done',t.vacation?`Выполнено. Приказ № ${fd.no.trim()} от ${fmtD(fd.date)}`:'Отмечена выполненной',fd.comment.trim()||null);
+      notify(r.authorId,r,`Заявка ${r.number} выполнена — подтвердите и оцените`); toast('Заявка отмечена выполненной'); },'Выполнено','btn-ok'); },
+  mreject(id){ const r=R(id); modal('Отклонить заявку '+r.number, commentField('Причина отклонения'), fd=>{ if(!fd.comment.trim()) return 'Комментарий обязателен'; setStatus(r,'rejected','Отклонено исполнителем',fd.comment.trim()); notify(r.authorId,r,`Заявка ${r.number} отклонена исполнителем`); },'Отклонить','btn-danger'); },
+  cancel(id){ const r=R(id); modal('Отозвать заявку '+r.number, '<p>Заявка будет отозвана и не поступит в работу. Продолжить?</p>'+commentField('Причина',false), fd=>{ setStatus(r,'cancelled','Отозвана заявителем',fd.comment.trim()||null); if(r.approverId) notify(r.approverId,r,`Заявка ${r.number} отозвана заявителем`); toast('Заявка отозвана'); },'Отозвать','btn-danger'); },
+  rate(id){ const r=R(id);
+    modal('Оценка выполнения', `<p class="muted">Оцените, насколько качественно выполнена заявка.</p><div class="stars" role="radiogroup" aria-label="Оценка">${[5,4,3,2,1].map(n=>`<input type="radio" name="rating" id="st${n}" value="${n}"><label for="st${n}" title="${n}">★</label>`).join('')}</div>`+commentField('Комментарий',false), fd=>{
+      if(!fd.rating) return 'Выберите оценку от 1 до 5';
+      r.rating=Number(fd.rating); r.ratingComment=fd.comment.trim(); r.closedAt=now(); setStatus(r,'closed',`Закрыта с оценкой ${r.rating}`);
+      if(r.assigneeId) notify(r.assigneeId,r,`Заявка ${r.number} закрыта, оценка: ${r.rating}`); toast('Спасибо! Заявка закрыта'); },'Закрыть заявку','btn-ok'); },
+  reopen(id){ const r=R(id); modal('Возобновить заявку', commentField('Что не так с выполнением'), fd=>{ if(!fd.comment.trim()) return 'Комментарий обязателен'; r.doneAt=null; setStatus(r,'in_progress','Возобновлена заявителем',fd.comment.trim()); if(r.assigneeId) notify(r.assigneeId,r,`Заявка ${r.number} возобновлена заявителем`); },'Возобновить'); },
+  comment(e,id){
+    e.preventDefault(); const r=R(id), f=e.target, text=f.text.value.trim(), u=me(), files=[...(f.files?.files||[])];
+    if(!text && !files.length){ toast('Введите текст комментария',true); return false; }
+    const bad=files.find(x=>!FILE_EXT.includes(x.name.split('.').pop().toLowerCase())||x.size>DB.settings.maxMb*1048576); if(bad){ toast('Недопустимый файл: '+bad.name,true); return false; }
+    const internal=!!f.internal?.checked;
+    r.comments.push({id:uid(),t:now(),userId:u.id,text:text+(files.length?(text?'\n':'')+'📎 '+files.map(x=>x.name).join(', '):''),internal});
+    files.forEach(x=>r.attachments.push({name:x.name,size:x.size}));
+    r.updatedAt=now();
+    if(r.status==='waiting_info' && r.authorId===u.id){ setStatus(r,'in_progress','Заявитель предоставил информацию — возврат в работу'); notify(r.assigneeId,r,`Заявитель ответил по заявке ${r.number}`); }
+    else { const to=internal?managersOf(catOf(r)).map(m=>m.id):[r.authorId,r.assigneeId,r.approverId]; [...new Set(to)].forEach(x=>notify(x,r,`Новый комментарий в заявке ${r.number}`)); }
+    save(); render(); return false;
+  },
+  exportList(kind){
+    const list = kind==='queue' ? queueFor(me()) : reportScope(me()).filter(r=>!Number(UI.reportPeriod)||r.createdAt>now()-Number(UI.reportPeriod)*DAY);
+    const rows=[['Номер','Категория','Тип','Заявитель','Подразделение','Статус','Приоритет','Исполнитель','Создана','Срок SLA','Выполнена','SLA соблюдён','Оценка']].concat(list.map(r=>[r.number,C(catOf(r)).name,T(r.typeId).name,U(r.authorId).name,D(U(r.authorId).dept)?.name,STATUS[r.status][0],r.priority,r.assigneeId?U(r.assigneeId).name:'',fmtDT(r.createdAt),r.slaDue?fmtDT(r.slaDue):'',r.doneAt?fmtDT(r.doneAt):'',r.slaDue&&r.doneAt?(r.doneAt<=r.slaDue?'Да':'Нет'):isOverdue(r)?'Нет':'',r.rating||'']));
+    download(`zayavki_${isoDate(new Date())}.csv`, csv(rows)); toast(`Выгружено строк: ${list.length}`);
+  },
+  exportAudit(){ download(`audit_${isoDate(new Date())}.csv`, csv([['Время','Пользователь','Действие','Объект','ID','Детали','IP']].concat(DB.audit.map(a=>[fmtDT(a.t),U(a.userId)?.name||'',a.action,a.entity,a.entityId,a.payload,a.ip])))); },
+
+  editUser(id){
+    const u = id?U(id):{name:'',login:'',email:'',position:'',dept:DB.departments[0].id,managerId:'',roles:['employee'],mgrCats:[],senior:false,phone:''};
+    const body = `<div class="field"><label for="un">ФИО <span class="req">*</span></label><input id="un" name="name" value="${esc(u.name)}"></div>
+    <div class="grid g2"><div class="field"><label for="ul">Логин <span class="req">*</span></label><input id="ul" name="login" value="${esc(u.login)}"></div><div class="field"><label for="ue">E-mail <span class="req">*</span></label><input id="ue" name="email" type="email" value="${esc(u.email)}"></div></div>
+    <div class="grid g2"><div class="field"><label for="up">Должность</label><input id="up" name="position" value="${esc(u.position)}"></div><div class="field"><label for="uph">Телефон</label><input id="uph" name="phone" value="${esc(u.phone)}"></div></div>
+    <div class="grid g2"><div class="field"><label for="ud">Подразделение</label><select id="ud" name="dept">${DB.departments.map(d=>`<option value="${d.id}" ${u.dept===d.id?'selected':''}>${esc(d.name)}</option>`).join('')}</select></div>
+    <div class="field"><label for="um">Непосредственный руководитель</label><select id="um" name="managerId"><option value="">— нет —</option>${DB.users.filter(x=>x.id!==u.id).map(x=>`<option value="${x.id}" ${u.managerId===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div></div>
+    <div class="lbl">Роли</div><div class="row" style="margin-bottom:12px">${Object.entries(ROLE_NAMES).map(([k,v])=>`<label class="check"><input type="checkbox" name="role_${k}" ${u.roles.includes(k)?'checked':''} ${k==='employee'?'disabled':''}> ${v}</label>`).join('')}</div>
+    <div class="lbl">Категории менеджера</div><div class="row" style="margin-bottom:8px">${DB.categories.map(c=>`<label class="check"><input type="checkbox" name="cat_${c.id}" ${u.mgrCats.includes(c.id)?'checked':''}> ${esc(c.name)}</label>`).join('')}<label class="check"><input type="checkbox" name="senior" ${u.senior?'checked':''}> Старший менеджер</label></div>`;
+    modal(id?'Пользователь':'Новый пользователь', body, fd=>{
+      if(!fd.name?.trim()||!fd.login?.trim()||!fd.email?.trim()) return 'Заполните ФИО, логин и e-mail';
+      if(!/^\S+@\S+\.\S+$/.test(fd.email.trim())) return 'Некорректный e-mail';
+      if(DB.users.some(x=>x.id!==id && (x.login.toLowerCase()===fd.login.trim().toLowerCase()||x.email.toLowerCase()===fd.email.trim().toLowerCase()))) return 'Логин или e-mail уже используется';
+      const roles=['employee',...['head','manager','admin'].filter(k=>fd['role_'+k])];
+      const target = id?u:{id:'u'+uid(),active:true,password:DEMO_PASSWORD,failed:0,lockedUntil:0,favorites:[],vacTotal:24,vacUsed:0,deputy:null,notif:{}};
+      if(id && target.roles.join()!==roles.join()) audit('Изменение ролей','User',target.login,`${target.roles.join(',')} → ${roles.join(',')}`);
+      Object.assign(target,{name:fd.name.trim(),login:fd.login.trim(),email:fd.email.trim(),position:fd.position.trim(),phone:fd.phone.trim(),dept:fd.dept,managerId:fd.managerId||null,roles,mgrCats:DB.categories.map(c=>c.id).filter(c=>fd['cat_'+c]),senior:!!fd.senior});
+      if(!id){ DB.users.push(target); audit('Создание пользователя','User',target.login,'Ссылка для установки пароля отправлена на '+target.email); toast('Пользователь создан. Ссылка для установки пароля отправлена на e-mail'); }
+      else { audit('Изменение пользователя','User',target.login); toast('Сохранено'); }
+    },'Сохранить');
+  },
+  importUsers(){
+    modal('Импорт пользователей', `<p class="small muted">Формат CSV: <span class="mono">ФИО;логин;e-mail;должность;код подразделения</span>. Коды: ${DB.departments.map(d=>d.id).join(', ')}</p><div class="field"><textarea name="csv" style="min-height:140px" class="mono" aria-label="CSV">Беков Арман Ерланович;bekov;bekov@oilgas.kz;Оператор;prod</textarea></div>`, fd=>{
+      const lines=fd.csv.split(/\r?\n/).map(l=>l.trim()).filter(Boolean); let ok=0; const errs=[];
+      lines.forEach((l,i)=>{ const [name,login,email,position,dept]=l.split(/[;,]/).map(s=>(s||'').trim());
+        if(!name||!login||!email){ errs.push(`стр. ${i+1}: не хватает полей`); return; }
+        if(DB.users.some(x=>x.login===login||x.email===email)){ errs.push(`стр. ${i+1}: ${login} уже существует`); return; }
+        const d=D(dept)?dept:'prod'; DB.users.push({id:'u'+uid(),name,login,email,position:position||'',dept:d,managerId:D(d).head,roles:['employee'],mgrCats:[],senior:false,phone:'',active:true,password:DEMO_PASSWORD,failed:0,lockedUntil:0,favorites:[],vacTotal:24,vacUsed:0,deputy:null,notif:{}}); ok++; });
+      if(!ok && errs.length) return errs.join('; ');
+      audit('Импорт пользователей','User','—',`${ok} записей`); toast(`Импортировано: ${ok}${errs.length?`, пропущено: ${errs.length}`:''}`);
+    },'Импортировать');
+  },
+  toggleBlock(id){ const u=U(id); if(u.id===me().id){ toast('Нельзя заблокировать себя',true); return; } u.active=!u.active; if(u.active){u.lockedUntil=0;u.failed=0;} audit(u.active?'Разблокировка пользователя':'Блокировка пользователя','User',u.login); save(); render(); },
+  resetPw(id){ const u=U(id); u.password=DEMO_PASSWORD; u.failed=0; u.lockedUntil=0; audit('Сброс пароля','User',u.login); save(); render(); toast(`Ссылка для установки пароля отправлена на ${u.email} (демо: пароль сброшен на ${DEMO_PASSWORD})`); },
+  setVac(id,v){ const u=U(id); const left=Math.max(0,Number(v)||0); u.vacTotal=u.vacUsed+left; audit('Изменение баланса отпуска','VacationBalance',u.login,`Остаток: ${left}`); save(); toast('Баланс отпуска обновлён'); },
+  addDept(){ modal('Новое подразделение', `<div class="field"><label for="dn">Название <span class="req">*</span></label><input id="dn" name="name"></div><div class="field"><label for="dpar">Вышестоящее</label><select id="dpar" name="parent">${DB.departments.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join('')}</select></div><div class="field"><label for="dh">Руководитель</label><select id="dh" name="head">${DB.users.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('')}</select></div>`, fd=>{ if(!fd.name.trim()) return 'Укажите название'; DB.departments.push({id:'d'+uid(),name:fd.name.trim(),parent:fd.parent,head:fd.head}); audit('Создание подразделения','Department',fd.name.trim()); },'Создать'); },
+  typeSet(id,k,v){ const t=T(id); audit('Изменение типа заявки','RequestType',t.name,`${k}: ${t[k]} → ${v}`); t[k]=v; save(); if(k==='active') render(); toast('Сохранено'); },
+  builderSync(f){ const b=UI.builder; b.name=f.name.value; b.cat=f.cat.value; b.sla=Number(f.sla.value)||1; b.approval=f.approval.checked;
+    b.fields.forEach((x,i)=>{ const prevType=x.type; x.label=f['fl'+i].value; x.type=f['ft'+i].value; x.options=f['fo'+i].value; x.req=f['fr'+i].checked; if(prevType!==x.type) f['fo'+i].disabled = x.type!=='select'; }); },
+  saveType(e){
+    e.preventDefault(); A.builderSync(e.target); const b=UI.builder, err=$('#berr');
+    if(!b.name.trim()){ err.textContent='Укажите название типа'; return false; }
+    if(!b.fields.length || b.fields.some(f=>!f.label.trim())){ err.textContent='Добавьте поля и заполните их подписи'; return false; }
+    if(b.fields.some(f=>f.type==='select' && f.options.split(';').filter(s=>s.trim()).length<2)){ err.textContent='Для выпадающего списка укажите минимум 2 варианта через «;»'; return false; }
+    const t={id:'t_'+uid(),cat:b.cat,name:b.name.trim(),approval:b.approval,sla:b.sla,slaApproval:8,active:true,fields:b.fields.map((f,i)=>({key:'f'+i,label:f.label.trim(),type:f.type,req:f.req,options:f.type==='select'?f.options.split(';').map(s=>s.trim()).filter(Boolean):undefined}))};
+    DB.types.push(t); audit('Создание типа заявки','RequestType',t.name,`${t.fields.length} полей, категория ${t.cat}`); UI.builder=null; UI.adminTab='catalog'; save();
+    toast('Тип заявки опубликован и доступен в каталоге'); go('admin'); return false;
+  },
+  saveSettings(e){ e.preventDefault(); const f=e.target; DB.company=f.company.value.trim()||DB.company; DB.settings.idle=Math.max(5,Number(f.idle.value)||30); DB.settings.maxFiles=Math.max(1,Number(f.maxFiles.value)||10); DB.settings.maxMb=Math.max(1,Number(f.maxMb.value)||20); audit('Изменение системных настроек','Settings','—'); save(); render(); toast('Настройки сохранены'); return false; },
+  saveDeputy(e){ e.preventDefault(); const f=e.target, u=me();
+    if(f.id.value && (!f.from.value||!f.to.value||f.to.value<f.from.value)){ toast('Укажите корректный период',true); return false; }
+    u.deputy = f.id.value?{id:f.id.value,from:f.from.value,to:f.to.value}:null; audit('Назначение заместителя','Deputy',u.login,u.deputy?`${shortName(U(u.deputy.id))}, ${fmtD(u.deputy.from)}–${fmtD(u.deputy.to)}`:'снят'); save(); toast('Заместитель сохранён'); return false; },
+  changePw(e){ e.preventDefault(); const f=e.target, u=me(), err=$('#pwErr');
+    if(f.old.value!==u.password){ err.textContent='Текущий пароль указан неверно'; return false; }
+    const p=f.nw.value; if(p.length<10||!/[A-ZА-Я]/.test(p)||!/[a-zа-я]/.test(p)||!/\d/.test(p)){ err.textContent='Пароль не соответствует политике: 10+ символов, заглавные и строчные буквы, цифры'; return false; }
+    if(p===u.password){ err.textContent='Новый пароль совпадает с текущим'; return false; }
+    if(p!==f.nw2.value){ err.textContent='Пароли не совпадают'; return false; }
+    u.password=p; audit('Смена пароля','User',u.login); save(); f.reset(); err.textContent=''; toast('Пароль изменён'); return false; },
+  saveNotif(f){ const u=me(); [...f.elements].filter(x=>x.name).forEach(x=>u.notif[x.name]=x.checked); save(); toast('Настройки уведомлений сохранены'); }
+};
+window.go=go; window.A=A; window.UI=UI; window.closeModal=closeModal;
+render();
+</script>
+</body>
+</html>
